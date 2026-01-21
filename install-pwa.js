@@ -34,10 +34,6 @@ document.getElementById("close-btn").addEventListener("click", () => {
   document.getElementById("install-popup").style.display = "none";
 });
 
-document.getElementById("dismiss-btn").addEventListener("click", () => {
-  document.getElementById("install-popup").style.display = "none";
-});
-
 // Evento quando o app é instalado (para evitar mostrar popup no futuro)
 window.addEventListener("appinstalled", () => {
   console.log("PWA instalado com sucesso!");
