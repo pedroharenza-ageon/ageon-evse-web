@@ -10,7 +10,6 @@ window.addEventListener("beforeinstallprompt", (e) => {
     document.getElementById("install-popup").style.display = "block"; 
   }
 });
-
 function isAppInstalled() {
   return window.matchMedia("(display-mode: standalone)").matches;
 }
