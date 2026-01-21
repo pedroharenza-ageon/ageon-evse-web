@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Dashboard EVSE - Monitoramento e controle de estação de carregamento de veículos elétricos">
+    <title>EVSE Dashboard</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'><path fill='%232563eb' d='M96 128C96 92.7 124.7 64 160 64L320 64C355.3 64 384 92.7 384 128L384 352C428.2 352 464 387.8 464 432L464 444C464 455 473 464 484 464C495 464 504 455 504 444L504 316.3C471.5 306.1 448 275.8 448 240L448 208C448 199.2 455.2 192 464 192L480 192L480 144C480 135.2 487.2 128 496 128C504.8 128 512 135.2 512 144L512 192L544 192L544 144C544 135.2 551.2 128 560 128C568.8 128 576 135.2 576 144L576 192L592 192C600.8 192 608 199.2 608 208L608 240C608 275.8 584.5 306.1 552 316.3L552 444C552 481.6 521.6 512 484 512C446.4 512 416 481.6 416 444L416 432C416 414.3 401.7 400 384 400L384 529.4C393.3 532.7 400 541.6 400 552C400 565.3 389.3 576 376 576L104 576C90.7 576 80 565.3 80 552C80 541.5 86.7 532.7 96 529.4L96 128zM178.7 253.7L217.7 253.7L196.8 320.6C194.4 328.2 200.1 336 208.1 336C211 336 213.7 335 215.9 333.1L310.5 251.1C313.6 248.4 315.4 244.5 315.4 240.4C315.4 232.6 309.1 226.3 301.3 226.3L262.3 226.3L283.2 159.4C285.6 151.8 279.9 144 271.9 144C269 144 266.3 145 264.1 146.9L169.5 228.9C166.4 231.6 164.6 235.5 164.6 239.6C164.6 247.4 170.9 253.7 178.7 253.7z'/></svg>">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js', { scope: './' })
+                .then(reg => {
+                console.log('SW registrado!', reg);
+                // Força a atualização se houver um novo SW
+                reg.update();
+                })
+                .catch(err => console.log('Erro no SW:', err));
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="app-shell">
+        <main class="main-content">
+            <div class="pull-to-refresh-indicator">
+                <i class="fas fa-arrow-down"></i>
+                <i class="fas fa-spinner fa-spin"></i>
+            </div>
+            <div id="page-container">
+                <div id="page-home" class="app-page active">
+                </div>
+            </div>
+        </main>
+
+        <nav class="bottom-nav">
+            <button id="nav-home" class="nav-button active">
+                <i class="fas fa-charging-station"></i>
+                <span>Início</span>
+            </button>
+            <button id="nav-history" class="nav-button">
+                <i class="fas fa-history"></i>
+                <span>Histórico</span>
+            </button>
+            <button id="nav-stats" class="nav-button">
+                <i class="fas fa-chart-line"></i>
+                <span>Estatísticas</span>
+            </button>
+            <button id="nav-profile" class="nav-button">
+                <i class="fas fa-user-circle"></i>
+                <span>Perfil</span>
+            </button>
+        </nav>
+    </div> 
+
+    <!-- Template para a Página de Início -->
+    <template id="page-home-template">
+        <div id="page-home" class="app-page">
+            <div class="page-header">
+                <h1 class="page-title">Carregadores</h1>
+            </div>
+            <div class="home-chart-container">
+                <canvas class="home-chart"></canvas>
+            </div>
+            <div class="device-list">
+                <!-- Cards de resumo serão inseridos aqui -->
+            </div>
+        </div>
+    </template>
+
+    <!-- Template para a Página de Histórico -->
+    <template id="page-history-template">
+        <div id="page-history" class="app-page">
+            <div class="page-header">
+                <h1 class="page-title">Histórico de Recargas</h1>
+            </div>
+            <div class="placeholder-content">
+                <i class="fas fa-history"></i>
+                <h2>Em Desenvolvimento</h2>
+                <p>Uma lista de todas as sessões de recarga aparecerá aqui em breve.</p>
+            </div>
+        </div>
+    </template>
+
+    <!-- Template para a Página de Estatísticas -->
+    <template id="page-stats-template">
+        <div id="page-stats" class="app-page">
+            <div class="page-header">
+                <h1 class="page-title">Estatísticas</h1>
+            </div>
+
+            <!-- 1. Seletor de Período -->
+            <div class="stats-filter-container">
+                <select id="stats-time-filter" class="form-select">
+                    <option value="daily">Últimas 24h</option>
+                    <option value="weekly" selected>Últimos 7 dias</option>
+                    <option value="monthly">Últimos 30 dias</option>
+                    <option value="total">Total</option>
+                </select>
+            </div>
+
+            <!-- 2. Cards de Resumo (KPIs) -->
+            <div class="stats-summary-grid">
+                <!-- Card 1: Energia Total Entregue -->
+                <div class="status-card stats-kpi-card">
+                    <div class="card-title"><i class="fas fa-bolt"></i> Energia Total</div>
+                    <div class="stats-value-large" id="total-energy">15.450 <small>kWh</small></div>
+                    <div class="stats-label-small">Mês Passado: 14.900 kWh</div>
+                </div>
+                
+                <!-- Card 2: Total de Sessões -->
+                <div class="status-card stats-kpi-card">
+                    <div class="card-title"><i class="fas fa-plug"></i> Sessões</div>
+                    <div class="stats-value-large" id="total-sessions">580</div>
+                    <div class="stats-label-small">Mês Passado: 550</div>
+                </div>
+
+                <!-- Card 3: Disponibilidade (Uptime) -->
+                <div class="status-card stats-kpi-card">
+                    <div class="card-title"><i class="fas fa-check-circle"></i> Disponibilidade</div>
+                    <div class="stats-value-large" id="uptime-rate">99.8<small>%</small></div>
+                    <div class="stats-label-small">Meta: 99.5%</div>
+                </div>
+
+                <!-- Card 4: Duração Média da Sessão -->
+                <div class="status-card stats-kpi-card">
+                    <div class="card-title"><i class="fas fa-clock"></i> Duração Média</div>
+                    <div class="stats-value-large" id="avg-duration">1h 45m</div>
+                    <div class="stats-label-small">Mês Passado: 1h 30m</div>
+                </div>
+            </div>
+
+            <!-- 3. Gráfico Principal -->
+            <div class="status-card stats-chart-card">
+                <div class="card-title"><i class="fas fa-chart-bar"></i> Consumo de Energia (kWh)</div>
+                <div class="chart-container">
+                    <canvas id="energy-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- 4. Detalhamento de Uso -->
+            <div class="status-card stats-detail-card">
+                <div class="card-title"><i class="fas fa-users"></i> Top Usuários/RFID</div>
+                <ul class="detail-list" id="top-users-list">
+                    <!-- Itens de lista serão preenchidos dinamicamente -->
+                    <li>
+                        <span class="detail-item-label">Usuário A (RFID: 1234)</span>
+                        <span class="detail-item-value">2.500 kWh</span>
+                    </li>
+                    <li>
+                        <span class="detail-item-label">Usuário B (RFID: 5678)</span>
+                        <span class="detail-item-value">1.800 kWh</span>
+                    </li>
+                    <li>
+                        <span class="detail-item-label">Visitante (RFID: 9012)</span>
+                        <span class="detail-item-value">950 kWh</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </template>
+
+    <!-- Template para a Página de Perfil -->
+    <template id="page-profile-template">
+        <div id="page-profile" class="app-page">
+            <div class="page-header">
+                <h1 class="page-title">Perfil</h1>
+            </div>
+            <div class="placeholder-content">
+                <i class="fas fa-user-circle"></i>
+                <h2>Em Desenvolvimento</h2>
+                <p>As configurações de usuário, conta e notificações estarão disponíveis aqui.</p>
+            </div>
+        </div>
+    </template>
+
+    <!-- Template para os cards de cada carregador -->
+    <template id="device-card-summary-template">
+        <div class="device-card-summary">
+            <div class="summary-icon">
+                <i class="fas fa-power-off"></i>
+            </div>
+            <div class="summary-details">
+                <div class="summary-name">EVSE Nome...</div>
+                <div class="summary-status">Conectando...</div>
+            </div>
+            <div class="summary-power">--.- kW</div>
+        </div>  
+    </template>
+
+    <!-- Modals -->
+    <!-- Schedule Modal -->
+    <div id="schedule-modal" class="modal" role="dialog" aria-labelledby="schedule-modal-title" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="schedule-modal-title">Agendar Recarga</h2>
+                <button id="btn-close-schedule" class="modal-close" aria-label="Fechar modal">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <form id="schedule-form" class="modal-form">
+                <!-- Seção de Horários -->
+                <fieldset class="form-fieldset">
+                    <legend class="fieldset-legend">Horário da Recarga</legend>
+                    <div class="schedule-time-wrapper">
+                        <!-- Horário de Início -->
+                        <div class="time-input-group">
+                            <label for="hours-schedule-start" class="time-input-label">Início</label>
+                            <div class="time-select-container-shcedule">
+                                <select id="hours-schedule-start" name="hours-schedule-start" aria-label="Horas de início"></select>
+                                <span class="separator">:</span>
+                                <select id="minutes-schedule-start" name="minutes-schedule-start" aria-label="Minutos de início"></select>
+                            </div>
+                        </div>
+
+                        <!-- Horário de Fim -->
+                        <div class="time-input-group">
+                            <label for="hours-schedule-end" class="time-input-label">Fim</label>
+                            <div class="time-select-container-shcedule">
+                                <select id="hours-schedule-end" name="hours-schedule-end" aria-label="Horas de fim"></select>
+                                <span class="separator">:</span>
+                                <select id="minutes-schedule-end" name="minutes-schedule-end" aria-label="Minutos de fim"></select>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Seção de Repetição -->
+                <fieldset class="form-fieldset">
+                    <legend class="fieldset-legend">Repetir nos dias</legend>
+                    <div class="weekday-selector">
+                        <!-- Checkboxes para os dias da semana (D, S, T, Q, Q, S, S) -->
+                        <label class="weekday-option"><input type="checkbox" name="weekday" value="1"><span>D</span></label>
+                        <label class="weekday-option"><input type="checkbox" name="weekday" value="2"><span>S</span></label>
+                        <label class="weekday-option"><input type="checkbox" name="weekday" value="3"><span>T</span></label>
+                        <label class="weekday-option"><input type="checkbox" name="weekday" value="4"><span>Q</span></label>
+                        <label class="weekday-option"><input type="checkbox" name="weekday" value="5"><span>Q</span></label>
+                        <label class="weekday-option"><input type="checkbox" name="weekday" value="6"><span>S</span></label>
+                        <label class="weekday-option"><input type="checkbox" name="weekday" value="7"><span>S</span></label>
+                    </div>
+                </fieldset>
+
+                <!-- Botões de Ação -->
+                <div class="modal-actions">
+                    <button type="submit" name="clear" class="btn-secondary">
+                        <i class="fas fa-trash" aria-hidden="true"></i>
+                        Limpar
+                    </button>
+                    <button type="submit" name="save" class="btn-primary">
+                        <i class="fas fa-save" aria-hidden="true"></i>
+                        Salvar
+                    </button>
+                </div>
+            </form>
+            <div id="schedule-message" class="form-message" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <!-- WiFi Modal -->
+    <div id="wifi-config-modal" class="modal" role="dialog" aria-labelledby="wifi-modal-title" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="wifi-modal-title">Configurar Wi-Fi</h2>
+                <button id="btn-close-modal" class="modal-close" aria-label="Fechar modal">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            <form id="wifi-config-form" class="modal-form">
+                <div class="input-group">
+                    <div class="input-label">
+                        <i class="fas fa-wifi"></i>
+                        <h2 class="wifi-config-subtitle">Rede Conectada</h2> 
+                    </div>
+                    <p id="current-ssid-display" class="wifi-info-badge">
+                        Verificando...
+                    </p>
+                </div>
+                <div class="input-group">
+                    <label for="ssid" class="input-label">
+                        <i class="fas fa-network-wired"></i>
+                        <h2 class="wifi-config-subtitle">Alterar para Nova Rede (SSID)</h2> 
+                    </label>
+                    <input type="text" id="ssid" name="ssid" placeholder="Digite o nome da rede Wi-Fi" required class="form-input"/>
+                </div>
+                <div class="input-group">
+                    <label for="password" class="input-label">
+                        <i class="fas fa-lock"></i>
+                        <h2 class="wifi-config-subtitle">Senha da Rede</h2> 
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" name="password" placeholder="Digite a senha da rede" required class="form-input"/>
+                        <button type="button" class="toggle-password" id="togglePassword" title="Mostrar/ocultar senha">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save" aria-hidden="true"></i>
+                    Salvar
+                </button>
+            </form>
+            <div id="form-message" class="form-message" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <!-- RFID Modal -->
+    <div id="rfid-config-modal" class="modal" role="dialog" aria-labelledby="rfid-modal-title" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="rfid-modal-title">Configurar RFID</h2>
+                <button id="btn-close-rfid" class="modal-close" aria-label="Fechar modal">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            <p id="rfid-modal-message" class="rfid-message">
+                Aproxime um cartão RFID para cadastrar.
+            </p>
+            <form id="rfid-config-form" class="modal-form">
+                <!-- Toggle para ativar/desativar RFID -->
+                <div class="input-group-toggle">
+                    <label for="rfid-enabled" class="input-label">
+                        <i class="fa fa-wifi" aria-hidden="true"></i>
+                        <h2 class="rfid-config-subtitle">Funcionalidade RFID</h2>
+                    </label>
+                    <div class="toggle-wrapper">
+                        <input type="checkbox" id="rfid-enabled" name="rfid-enabled" class="toggle-input"/>
+                        <label for="rfid-enabled" class="toggle-label">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Seção de cadastro de cartões RFID -->
+                <div class="input-group">
+                    <label for="card-name" class="input-label">
+                        <i class="fa fa-user-circle" aria-hidden="true"></i>
+                        <h2 class="rfid-config-subtitle">Cadastrar Usuário</h2>
+                    </label>
+                    <div class="card-input-wrapper">
+                        <input type="text" id="card-name" name="card-name" placeholder="Nome do cartão (ex: Cartão Principal)" class="form-input"/>
+                        <input type="text" id="card-id" name="card-id" placeholder="ID do cartão RFID" class="form-input"/>
+                        <button type="button" id="add-card-btn" class="btn-secondary">
+                            <i class="fab fa-plus" aria-hidden="true"></i>
+                            Adicionar Usuário
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lista de cartões cadastrados -->
+                <div class="input-group">
+                    <div class="input-label">
+                        <i class="fa fa-address-book" aria-hidden="true"></i>
+                        <h2 class="rfid-config-subtitle">Usuários Cadastrados</h2>
+                    </div>
+                    <div id="cards-list" class="cards-list">
+                        <!-- Cartões serão adicionados dinamicamente aqui -->
+                        <div class="empty-state">
+                            <p>Nenhum usuário cadastrado</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save" aria-hidden="true"></i>
+                    Salvar Configurações
+                </button>
+            </form>
+            <div id="rfid-form-message" class="form-message" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <!-- Console Debug Modal -->
+    <div id="console-modal" class="modal" role="dialog" aria-labelledby="console-modal-title" aria-hidden="true">
+        <div class="modal-content console-modal-content">
+            <div class="modal-header">
+                <h2 id="console-modal-title">
+                    <i class="fas fa-terminal"></i>
+                    Console
+                </h2>
+                <div class="console-actions">
+                    <button id="btn-clear-console" class="btn-icon" title="Limpar console" aria-label="Limpar console">
+                        <i class="fas fa-trash" aria-hidden="true"></i>
+                    </button>
+                    <button id="btn-copy-console" class="btn-icon" title="Copiar log" aria-label="Copiar log">
+                        <i class="fas fa-copy" aria-hidden="true"></i>
+                    </button>
+                    <button id="btn-close-console" class="modal-close" aria-label="Fechar console">
+                        <i class="fas fa-times" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="console-controls">
+                <div class="console-filter">
+                    <label for="console-filter-tag" class="console-filter-label">
+                        <i class="fas fa-filter"></i>
+                        Filtrar por tag:
+                    </label>
+                    <select id="console-filter-tag" class="console-filter-select">
+                        <option value="all">Todas as tags</option>
+                        <!-- Tags serão preenchidas dinamicamente -->
+                    </select>
+                    <input type="text" id="console-search" class="console-search-input" placeholder="Buscar nas mensagens..." />
+                </div>
+            </div>
+            
+            <div id="console-output" class="console-output" role="log" aria-live="polite">
+                <!-- As mensagens serão adicionadas aqui -->
+                <div class="console-empty-state">
+                    <i class="fas fa-terminal"></i>
+                    <p>Aguardando mensagens do console...</p>
+                    <small>As mensagens de debug aparecerão aqui automaticamente</small>
+                </div>
+            </div>
+            
+            <div class="console-footer">
+                <div class="console-input-group">
+                    <input type="text" id="console-command-input" class="console-input" 
+                        placeholder="Digite um comando:" />
+                    <button id="btn-send-command" class="btn-primary btn-sm">
+                        <i class="fas fa-paper-plane"></i>
+                        Enviar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <template id="card-item-template">
+        <div class="card-item">
+            <div class="card-info">
+                <span class="card-name"></span>
+                <span class="card-id"></span>
+            </div>
+            <button type="button" class="btn-remove-card" aria-label="Remover cartão">
+                <i class="fas fa-trash" aria-hidden="true"></i>
+            </button>
+        </div>
+    </template>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+            <span>Carregando...</span>
+        </div>
+    </div>
+    
+    <template id="device-detail-page-template">
+        <div class="app-page">
+            <div class="detail-status-bar"></div>
+            <div class="page-header">
+                <a href="#" class="back-button"><i class="fas fa-chevron-left"></i></a>
+                <h1 class="page-title">Nome do EVSE</h1>
+            </div>
+
+            <div class="detail-hero-status">
+                <div class="detail-status-icon"><i class="fas fa-power-off"></i></div>
+                <div class="detail-status-text">DISPONÍVEL</div>
+                <div class="detail-sub-text">Sessão: --:--:--</div>
+        
+                <div class="hero-data-grid">
+                    <div class="detail-info-box">
+                        <div class="info-box-value power-value">-.- <small>kW</small></div>
+                        <div class="info-box-label">Potência</div>
+                    </div>
+                    <div class="detail-info-box">
+                        <div class="info-box-value energy-value">-.-- <small>kWh</small></div>
+                        <div class="info-box-label">Energia</div>
+                    </div>
+                    <div class="detail-info-box">
+                        <div class="info-box-value current-value">-- <large>A</large></div>
+                        <div class="info-box-label">Corrente Máx.</div>
+                    </div>
+                    <div class="detail-info-box">
+                        <div class="info-box-value temp-value-1">-- <small>°C</small></div>
+                        <div class="info-box-label">Temp. Sensor 1</div>
+                    </div>
+                    <div class="detail-info-box">
+                        <div class="info-box-value temp-value-2">-- <small>°C</small></div>
+                        <div class="info-box-label">Temp. Sensor 2</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-chart-container">
+                <canvas class="evse-chart"></canvas>
+            </div>
+
+            <div class="chart-summary-data">
+                <div class="summary-data-label">Média do Sinal CP High:</div>
+                <div class="summary-data-value cp-high-average-value">-- mV</div>
+                <div class="summary-data-label">Pico a Pico do Sinal CP High:</div>
+                <div class="summary-data-value cp-peaktopeak-value">-- mV</div>
+            </div>
+
+            <div class="detail-actions">
+                <button class="detail-action-btn block-btn"><i class="fas fa-lock"></i> Bloquear Carregador</button>
+                <button class="detail-action-btn schedule-btn"><i class="fas fa-calendar-alt"></i> Agendamentos</button>
+                <button class="detail-action-btn rfid-btn"><i class="fas fa-id-card"></i> Configurar RFID</button>
+                <button class="detail-action-btn current-btn"><i class="fas fa-bolt"></i> Alterar Corrente</button>
+                <button class="detail-action-btn wifi-btn"><i class="fas fa-wifi"></i> Configurar Wi-Fi</button>
+                <button class="detail-action-btn debug-btn"><i class="fas fa-bug"></i> Debug</button>
+                <button class="detail-action-btn console-btn"><i class="fas fa-terminal"></i> Console Debug</button>
+            </div>
+        </div>
+    </template>
+
+    <!-- JS externo -->
+    <script type="module" src="main.js"></script>
+    <script defer src="script.js"></script>
+    </script>
+</body>
+</html>
