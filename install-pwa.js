@@ -6,10 +6,13 @@ window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault(); // bloqueia o prompt automático
   deferredPrompt = e;
 
+  // Se o app já não estiver instalado, mostra o popup
   if (!isAppInstalled()) {
-    document.getElementById("install-popup").style.display = "block"; 
+    document.getElementById("install-popup").style.display = "block";
   }
 });
+
+// Função para detectar se o app já está instalado
 function isAppInstalled() {
   return window.matchMedia("(display-mode: standalone)").matches;
 }
@@ -26,17 +29,14 @@ document.getElementById("install-btn").addEventListener("click", async () => {
   document.getElementById("install-popup").style.display = "none";
 });
 
-// Botão de fechar popup ("Agora não")
+// Botão de fechar popup
 document.getElementById("close-btn").addEventListener("click", () => {
   document.getElementById("install-popup").style.display = "none";
 });
 
-// << NOVO: Botão de fechar popup ('X') >>
-// Adiciona a mesma função de fechar para o botão 'X'.
 document.getElementById("dismiss-btn").addEventListener("click", () => {
   document.getElementById("install-popup").style.display = "none";
 });
-
 
 // Evento quando o app é instalado (para evitar mostrar popup no futuro)
 window.addEventListener("appinstalled", () => {
