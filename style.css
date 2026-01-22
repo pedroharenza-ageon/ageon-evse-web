@@ -63,24 +63,19 @@ body {
     margin: 0;
     padding: 0;
     padding-bottom: 80px; 
-    overflow: hidden;
-    overscroll-behavior: none;
 }
 
 .app-shell {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    min-height: 100vh; /* Garante que o shell ocupe pelo menos a altura da tela */
 }
 
 .main-content {
     flex-grow: 1; /* Faz o conteúdo principal crescer para ocupar o espaço disponível */
     overflow-y: auto; /* Adiciona rolagem se o conteúdo for maior que a tela */
     padding: var(--spacing-md);
-    overscroll-behavior: contain;
-    touch-action: pan-y;
-    /* espaço para não ficar atrás da bottom-nav */
-    padding-bottom: calc(var(--spacing-md) + 65px);
+    overflow: hidden; 
 }
 
 #page-container {
@@ -93,23 +88,18 @@ body {
     background-color: var(--bg-primary); 
 }
 
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
+.pull-to-refresh-indicator {
+    position: absolute;
+    top: 10px; /* Posição fixa no topo do .main-content */
     left: 0;
     right: 0;
-    height: 65px;
-    background-color: var(--bg-secondary);
-    border-top: 1px solid var(--border-color);
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    height: 50px;
     display: flex;
-    justify-content: space-around;
     align-items: center;
-    z-index: 1000;
-    overscroll-behavior: none;
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    will-change: auto;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    /* Não precisa mais de z-index, pois o page-container já está na frente */
 }
 
 .nav-button {
