@@ -64,6 +64,7 @@ body {
     padding: 0;
     padding-bottom: 80px; 
     overflow: hidden;
+    overscroll-behavior: none;
 }
 
 .app-shell {
@@ -76,7 +77,8 @@ body {
     flex-grow: 1; /* Faz o conteúdo principal crescer para ocupar o espaço disponível */
     overflow-y: auto; /* Adiciona rolagem se o conteúdo for maior que a tela */
     padding: var(--spacing-md);
-    overscroll-behavior: none;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
     /* espaço para não ficar atrás da bottom-nav */
     padding-bottom: calc(var(--spacing-md) + 65px);
 }
@@ -105,6 +107,9 @@ body {
     align-items: center;
     z-index: 1000;
     overscroll-behavior: none;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    will-change: auto;
 }
 
 .nav-button {
