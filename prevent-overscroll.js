@@ -34,4 +34,4 @@ function preventBounce(sides = { top: true, bottom: true, left: true, right: tru
       e.preventDefault(); // Block the bounce
     }
   }, { passive: false }); // Again, passive: false is required to call preventDefault
-}
+}   
