@@ -62,8 +62,6 @@ export function navigateToPage(dashboardInstance, pageId) {
         //console.log("Navegando para a página inicial, configurando gráfico homeChart.");
         setupHomeChart(dashboardInstance, newPage);
     }
-    // Atualiza comportamento de pull-to-refresh
-    updatePullToRefresh(dashboardInstance, pageId);
 }
 
 /**
@@ -93,36 +91,6 @@ export function showPage(pageId) {
 
     newPage.classList.add('active');
     return newPage;  // ← útil para próximas migrações
-}
-
-/**
- * ==============================================================
- * Função responsável por verificar se a página atual suporta
- * pull-to-refresh
- * ==============================================================
- */
-
-export function isRefreshablePage(pageId) {
-    const refreshablePages = ['page-home', 'page-history', 'page-stats'];
-    return refreshablePages.includes(pageId);
-}
-
-/**
- * ==============================================================
- * Função responsável por ativar ou desativar o pull-to-refresh
- * dependendo da página atual.
- * ==============================================================
- */
-export function updatePullToRefresh(dashboardInstance, pageId) {
-    if (isRefreshablePage(pageId)) {
-        if (window.EVSE_isMobile()) {
-            dashboardInstance.activatePullToRefresh();
-        } else {
-            dashboardInstance.deactivatePullToRefresh();
-        }
-    } else {
-        dashboardInstance.deactivatePullToRefresh();
-    }
 }
 
 
