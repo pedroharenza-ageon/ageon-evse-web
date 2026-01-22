@@ -7,14 +7,14 @@ window.addEventListener("beforeinstallprompt", (e) => {
   deferredPrompt = e;
 
   // Se o app já não estiver instalado, mostra o popup
-  if (!isAppInstalled()) {
+  if (deferredPrompt && !isAppInstalled()) {
     document.getElementById("install-popup").style.display = "block";
   }
 });
 
 // Função para detectar se o app já está instalado
 function isAppInstalled() {
-  return window.matchMedia("(display-mode: standalone)").matches;
+  return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
 }
 
 // Botão de instalação
