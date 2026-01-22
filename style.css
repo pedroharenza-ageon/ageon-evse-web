@@ -63,12 +63,13 @@ body {
     margin: 0;
     padding: 0;
     padding-bottom: 80px; 
+    overflow: hidden;
 }
 
 .app-shell {
     display: flex;
     flex-direction: column;
-    min-height: 100vh; /* Garante que o shell ocupe pelo menos a altura da tela */
+    height: 100vh; /* Garante que o shell ocupe pelo menos a altura da tela */
 }
 
 .main-content {
@@ -76,6 +77,7 @@ body {
     overflow-y: auto; /* Adiciona rolagem se o conteúdo for maior que a tela */
     padding: var(--spacing-md);
     overscroll-behavior: contain;
+    padding-bottom: calc(var(--spacing-md) + 65px);
 }
 
 #page-container {
