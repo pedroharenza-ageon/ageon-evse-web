@@ -56,7 +56,7 @@
 html {
   overflow: hidden;
   height: 100%;
-  position: fixed;
+  position: auto;
 }
 
 /* Tipografia base */
