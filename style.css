@@ -63,19 +63,29 @@ body {
     margin: 0;
     padding: 0;
     padding-bottom: 80px; 
+
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    position: fixed;
 }
 
 .app-shell {
     display: flex;
     flex-direction: column;
     min-height: 100vh; /* Garante que o shell ocupe pelo menos a altura da tela */
+    height: -webkit-fill-available; /* Suporte para mobile */
+    overflow: hidden;
 }
 
 .main-content {
     flex-grow: 1; /* Faz o conteúdo principal crescer para ocupar o espaço disponível */
-    overflow-y: auto; /* Adiciona rolagem se o conteúdo for maior que a tela */
     padding: var(--spacing-md);
-    overflow: hidden; 
+
+    overflow-y: auto; /* Adiciona rolagem se o conteúdo for maior que a tela */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: auto;
+    padding-bottom: 80px;
 }
 
 #page-container {
@@ -90,7 +100,7 @@ body {
 
 .pull-to-refresh-indicator {
     position: absolute;
-    top: 10px; /* Posição fixa no topo do .main-content */
+    top: 10px;
     left: 0;
     right: 0;
     height: 50px;
@@ -99,7 +109,8 @@ body {
     justify-content: center;
     font-size: 1.5rem;
     color: var(--text-secondary);
-    /* Não precisa mais de z-index, pois o page-container já está na frente */
+    /* Aumentamos o z-index para garantir visibilidade no novo contexto */
+    z-index: 5;
 }
 
 .pull-to-refresh-indicator .fa-spinner {
@@ -127,6 +138,14 @@ body {
     justify-content: space-around;
     align-items: center;
     z-index: 1000;
+
+    /* ISOLAMENTO DE CAMADA (GPU) */
+    /* Isso impede que o efeito de bounce do viewport afete a barra */
+    transform: translateZ(0);
+    will-change: transform;
+    
+    /* Impede que toques na barra iniciem scroll no fundo */
+    touch-action: none;
 }
 
 .nav-button {
