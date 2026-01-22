@@ -76,6 +76,8 @@ body {
     flex-grow: 1; /* Faz o conteúdo principal crescer para ocupar o espaço disponível */
     overflow-y: auto; /* Adiciona rolagem se o conteúdo for maior que a tela */
     padding: var(--spacing-md);
+    /* espaço para não ficar atrás da bottom-nav */
+    padding-bottom: calc(var(--spacing-md) + 65px);
 }
 
 #page-container {
