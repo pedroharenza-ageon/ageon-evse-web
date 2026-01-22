@@ -63,6 +63,7 @@ body {
     margin: 0;
     padding: 0;
     padding-bottom: 80px; 
+    overflow: hidden;
 }
 
 .app-shell {
@@ -75,7 +76,6 @@ body {
     flex-grow: 1; /* Faz o conteúdo principal crescer para ocupar o espaço disponível */
     overflow-y: auto; /* Adiciona rolagem se o conteúdo for maior que a tela */
     padding: var(--spacing-md);
-    overflow: hidden; 
 }
 
 #page-container {
@@ -128,7 +128,8 @@ body {
     align-items: center;
     z-index: 1000;
     transform: translateZ(0);
-    contain: layout style;
+    will-change: transform;
+    touch-action: none;
 }
 
 .nav-button {
