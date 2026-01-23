@@ -67,7 +67,6 @@ body {
     margin: 0;
     padding: 0;
     padding-bottom: 80px; 
-    overscroll-behavior: contain;
 }
 
 .app-shell {
@@ -78,9 +77,8 @@ body {
 
 .main-content {
     flex-grow: 1; /* Faz o conteúdo principal crescer para ocupar o espaço disponível */
-    overflow-y: auto; /* Adiciona rolagem se o conteúdo for maior que a tela */
     padding: var(--spacing-md);
-    overflow: hidden; 
+    overscroll-behavior: contain;
 }
 
 #page-container {
