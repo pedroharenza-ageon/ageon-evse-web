@@ -53,6 +53,11 @@
     --transition-slow: 350ms ease-in-out;
 }
 
+html {
+  margin: 0;
+  overscroll-behavior: none;
+}
+
 /* Tipografia base */
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
