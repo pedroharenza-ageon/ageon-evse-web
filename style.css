@@ -78,7 +78,6 @@ body {
 .main-content {
     flex-grow: 1; /* Faz o conteúdo principal crescer para ocupar o espaço disponível */
     padding: var(--spacing-md);
-    overscroll-behavior: contain;
 }
 
 #page-container {
@@ -1216,6 +1215,7 @@ html[data-theme="dark"] {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
+    overscroll-behavior: contain;
 }
 
 .device-card-summary {
