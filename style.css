@@ -62,7 +62,7 @@ html, body {
     background-color: var(--bg-primary);
     margin: 0;
     padding: 0;
-    padding-bottom: 80px; 
+    padding-bottom: 30px; 
     overflow: hidden;
     height: 100%;
 }
