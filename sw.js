@@ -1,5 +1,5 @@
 // Nome e versão do cache. MUDE A VERSÃO a cada nova atualização.
-const cacheName = 'dashboard-v1.4.2'; 
+const cacheName = 'dashboard-v1.4.3'; 
 
 // Arquivos que o app vai salvar para abrir rápido
 const staticAssets = [

@@ -53,13 +53,8 @@
     --transition-slow: 350ms ease-in-out;
 }
 
-html {
-  margin: 0;
-  overscroll-behavior: none;
-}
-
 /* Tipografia base */
-body {
+html, body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     font-size: 16px;
     line-height: 1.5;
@@ -68,17 +63,21 @@ body {
     margin: 0;
     padding: 0;
     padding-bottom: 80px; 
+    overflow: hidden;
+    height: 100%;
 }
 
 .app-shell {
     display: flex;
     flex-direction: column;
-    min-height: 100vh; /* Garante que o shell ocupe pelo menos a altura da tela */
+    height: 100%; /* Garante que o shell ocupe pelo menos a altura da tela */
 }
 
 .main-content {
     flex-grow: 1; /* Faz o conteúdo principal crescer para ocupar o espaço disponível */
+    overflow-y: auto;
     padding: var(--spacing-md);
+    overscroll-behavior: contain;
 }
 
 #page-container {
