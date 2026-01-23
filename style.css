@@ -1215,7 +1215,8 @@ html[data-theme="dark"] {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
-    overscroll-behavior: contain;
+    overscroll-behavior: none;
+    margin-bottom: 10px; 
 }
 
 .device-card-summary {
