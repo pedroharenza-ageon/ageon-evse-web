@@ -67,6 +67,7 @@ body {
     margin: 0;
     padding: 0;
     padding-bottom: 80px; 
+    overscroll-behavior: none;
 }
 
 .app-shell {
@@ -1215,7 +1216,6 @@ html[data-theme="dark"] {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
-    overscroll-behavior: none;
     margin-bottom: 10px; 
 }
 
