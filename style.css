@@ -55,6 +55,7 @@
 
 html {
   margin: 0;
+  overscroll-behavior: none;
 }
 
 /* Tipografia base */
@@ -67,7 +68,6 @@ body {
     margin: 0;
     padding: 0;
     padding-bottom: 80px; 
-    overscroll-behavior: none;
 }
 
 .app-shell {
