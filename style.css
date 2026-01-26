@@ -77,7 +77,6 @@ html, body {
     flex-grow: 1; /* Faz o conteúdo principal crescer para ocupar o espaço disponível */
     overflow-y: auto;
     padding: var(--spacing-md);
-    overscroll-behavior: auto;
 }
 
 #page-container {

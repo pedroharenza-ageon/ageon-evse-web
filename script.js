@@ -271,6 +271,18 @@ class EVSEDashboard {
         window.EVSE_MQTT_MANAGER.publishMessage(this.mqttClient, commandTopic, {});
     }
 
+    gfciSelfTest(deviceId) {
+        if (!deviceId) {
+            console.error("gfciSelfTest chamado sem um deviceId.");
+            return;
+        }
+        console.log(`Enviando comando de gfciSelfTest para o dispositivo ${deviceId}...`);
+        const commandTopic = MQTT_CONFIG.topics.commandTemplate
+            .replace('{deviceId}', deviceId)
+            .replace('{commandName}', 'gfci_self_test');
+        window.EVSE_MQTT_MANAGER.publishMessage(this.mqttClient, commandTopic, {});
+    }
+
     changeCurrent(deviceId) {
         if (!deviceId) {
             console.error("changeCurrent chamado sem um deviceId.");
@@ -693,6 +705,11 @@ class EVSEDashboard {
                 this.toggleRainbow(currentDeviceId);
                 this.addConsoleMessage('SYS', 'toggle rainbow', currentDeviceId);
                 return true;
+            
+            case 'gfci_test':
+                this.gfciSelfTest(currentDeviceId);
+                this.addConsoleMessage('SYS', 'running GFCI self-test..', currentDeviceId);
+                return true;
         }
         
         return false;
@@ -714,6 +731,7 @@ class EVSEDashboard {
         this.addConsoleMessage('SYS', 'force_error ----------- Força estado de erro ESTADO_F', currentDeviceId);
         this.addConsoleMessage('SYS', 'reset_rfid ------------ Reseta configuração RFID', currentDeviceId);
         this.addConsoleMessage('SYS', 'reset ----------------- Reseta o EVSE', currentDeviceId);
+        this.addConsoleMessage('SYS', 'gfci_test ------------- Inicia auto-teste do GFCI', currentDeviceId);
         this.addConsoleMessage('SYS', '1.0', currentDeviceId);
     }
 
