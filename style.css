@@ -1550,7 +1550,7 @@ html[data-theme="dark"] {
     flex-direction: column;
     gap: var(--spacing-md);
     margin-top: var(--spacing-lg);
-    margin-bottom: 10px
+    margin-bottom: 25px
 }
 
 .detail-action-btn {

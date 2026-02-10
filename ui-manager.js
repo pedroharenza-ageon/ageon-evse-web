@@ -325,18 +325,20 @@ export function setupDetailChart(dashboardInstance, pageElement, deviceId) {
             labels: [],
             datasets: [
                 {
-                    label: 'V_RMS',
+                    label: 'VAC',
                     data: [],
                     backgroundColor: '#2563eb',
                     borderWidth: 0,
-                    borderRadius: 4
+                    borderRadius: 4,
+                    yAxisID: 'y',
                 },
                 {
-                    label: 'I_RMS',
+                    label: 'IAC',
                     data: [],
                     backgroundColor: '#77a6dcff',
                     borderWidth: 0,
-                    borderRadius: 4
+                    borderRadius: 4,
+                    yAxisID: 'y1',
                 }
             ]
         },
@@ -350,14 +352,33 @@ export function setupDetailChart(dashboardInstance, pageElement, deviceId) {
                     grid: { display: false }
                 },
                 y: {
+                    type: 'linear',
+                    position: 'left',
                     beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Tensão (VAC)'
+                    },
                     ticks: {
-                        color: getComputedStyle(document.body)
-                            .getPropertyValue('--text-secondary')
+                        color: getComputedStyle(document.body).getPropertyValue('--text-secondary')
                     },
                     grid: {
-                        color: getComputedStyle(document.body)
-                            .getPropertyValue('--border-color')
+                        color: getComputedStyle(document.body).getPropertyValue('--border-color')
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    position: 'right',
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Corrente (A)'
+                    },
+                    ticks: {
+                        color: getComputedStyle(document.body).getPropertyValue('--text-secondary')
+                    },
+                    grid: {
+                        drawOnChartArea: false // evita sobreposição da grid do eixo Y principal
                     }
                 }
             },
@@ -540,20 +561,38 @@ export function addDetailChartData(chartInstance, data, graphType) {
 
         // Inicializa labels e dados se estiver vazio
         if (labels.length === 0) {
-            labels.push('A', 'B', 'C');
+            labels.push('L1', 'L2', 'L3');
         }
         if (dataset.length === 0) {
             dataset.push(0, 0, 0);
         }
 
         // Atualiza valores diretamente (ReactiveArray do Chart.js suporta indexação)
-        dataset[0] = data.vrms_a || 0;
-        dataset[1] = data.vrms_b || 0;
-        dataset[2] = data.vrms_c || 0;
+        dataset[0] = data.V1 || 0;
+        dataset[1] = data.V2 || 0;
+        dataset[2] = data.V3 || 0;
 
         chartInstance.update();
+    }
 
-        // Futuramente aqui você pode adicionar médias, P2P ou outras métricas
+    if (graphType === 'irms' && chartInstance.config.type === 'bar') {
+        const labels = chartInstance.data.labels;
+        const dataset = chartInstance.data.datasets[1].data; // assumindo 1 dataset com múltiplas barras
+
+        // Inicializa labels e dados se estiver vazio
+        if (labels.length === 0) {
+            labels.push('L1', 'L2', 'L3');
+        }
+        if (dataset.length === 0) {
+            dataset.push(0, 0, 0);
+        }
+
+        // Atualiza valores diretamente (ReactiveArray do Chart.js suporta indexação)
+        dataset[0] = data.I1 || 0;
+        dataset[1] = data.I2 || 0;
+        dataset[2] = data.I3 || 0;
+
+        chartInstance.update();
     }
 }
 
@@ -736,6 +775,14 @@ export function updateDetailPageUI(dashboardInstance, deviceId, statusName, data
             }
             break;
         }
+
+        case 'irms_data': {
+            if (device) {
+                EVSE.ui.addDetailChartData(device.chart2, data, 'irms');
+            }
+            break;
+        }
+
         case 'debug_data':
             const debugString = JSON.stringify(data, null, 2);
             alert(`Dados de Debug para ${deviceId}:\n\n${debugString}`);

@@ -122,6 +122,9 @@ function notifyStatusUpdate(deviceId, statusName, data, dashboardInstance) {
         
         case 'vrms_data':
             handleVRMSData(deviceId, data, dashboardInstance);
+
+        case 'irms_data':
+            handleIRMSData(deviceId, data, dashboardInstance);
     }
 }
 
@@ -189,5 +192,12 @@ function handleVRMSData(deviceId, data, dashboardInstance) {
     const device = dashboardInstance.devices[deviceId];
     if (device && EVSE.ui.addDetailChartData && device.vrmChart) {
         EVSE.ui.addDetailChartData(device.vrmChart, data, 'vrms');
+    }
+}
+
+function handleIRMSData(deviceId, data, dashboardInstance) {
+        const device = dashboardInstance.devices[deviceId];
+    if (device && EVSE.ui.addDetailChartData && device.vrmChart) {
+        EVSE.ui.addDetailChartData(device.vrmChart, data, 'irms');
     }
 }
