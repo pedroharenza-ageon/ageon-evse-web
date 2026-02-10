@@ -119,6 +119,9 @@ function notifyStatusUpdate(deviceId, statusName, data, dashboardInstance) {
         case 'cp_data':
             handleCPData(deviceId, data, dashboardInstance);
             break;
+        
+        case 'vrms_data':
+            handleVRMSData(deviceId, data, dashboardInstance);
     }
 }
 
@@ -177,7 +180,14 @@ function handleTemperature(deviceId, data, dashboardInstance) {
  */
 function handleCPData(deviceId, data, dashboardInstance) {
     const device = dashboardInstance.devices[deviceId];
-    if (device && EVSE.ui.addChartData && device.chart) {
-        EVSE.ui.addChartData(device.chart, data);
+    if (device && EVSE.ui.addDetailChartData && device.chart) {
+        EVSE.ui.addDetailChartData(device.chart, data, 'cp');
     } 
+}
+
+function handleVRMSData(deviceId, data, dashboardInstance) {
+    const device = dashboardInstance.devices[deviceId];
+    if (device && EVSE.ui.addDetailChartData && device.vrmChart) {
+        EVSE.ui.addDetailChartData(device.vrmChart, data, 'vrms');
+    }
 }

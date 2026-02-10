@@ -240,14 +240,22 @@ export function addDetailEventListeners(dashborad, pageElement, deviceId) {
  * ==============================================================
  */
 export function setupDetailChart(dashboardInstance, pageElement, deviceId) {
-    const canvas = pageElement.querySelector('.evse-chart');
-    if (!canvas) {
+    const canvas1 = pageElement.querySelector('.evse-detail-device-chart-1');
+    const canvas2 = pageElement.querySelector('.evse-detail-device-chart-2');
+
+    if (!canvas1 || !canvas2) {
         console.error("Canvas para o gráfico de detalhes não encontrado!");
         return;
     }
-    const ctx = canvas.getContext('2d');
 
-    const chartInstance = new Chart(ctx, {
+    const ctx1 = canvas1.getContext('2d');
+    const ctx2 = canvas2.getContext('2d');
+
+    /* ==========================
+       Configuração do Gráfico 1
+       (LINHA)
+       ========================== */
+    const chartConfig1 = {
         type: 'line',
         data: {
             labels: [],
@@ -255,7 +263,8 @@ export function setupDetailChart(dashboardInstance, pageElement, deviceId) {
                 {
                     label: 'CP High',
                     data: [],
-                    borderColor: '#2563eb', // Azul para CP High
+                    borderColor: '#2563eb',
+                    backgroundColor: '#2563eb',
                     borderWidth: 2,
                     fill: false,
                     pointRadius: 1,
@@ -264,7 +273,8 @@ export function setupDetailChart(dashboardInstance, pageElement, deviceId) {
                 {
                     label: 'CP Low',
                     data: [],
-                    borderColor: '#77a6dcff', // Vermelho para CP Low
+                    borderColor: '#77a6dcff',
+                    backgroundColor: '#77a6dcff',
                     borderWidth: 2,
                     fill: false,
                     pointRadius: 1,
@@ -277,32 +287,106 @@ export function setupDetailChart(dashboardInstance, pageElement, deviceId) {
             maintainAspectRatio: false,
             animation: { duration: 0 },
             scales: {
-                x: { display: true, 
-                    ticks: {
-                        maxTicksLimit: 6
-                    }
+                x: {
+                    display: true,
+                    ticks: { maxTicksLimit: 6 }
                 },
                 y: {
                     beginAtZero: false,
-                    ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-secondary') },
-                    grid: { color: getComputedStyle(document.body).getPropertyValue('--border-color') }
+                    ticks: {
+                        color: getComputedStyle(document.body)
+                            .getPropertyValue('--text-secondary')
+                    },
+                    grid: {
+                        color: getComputedStyle(document.body)
+                            .getPropertyValue('--border-color')
+                    }
                 }
             },
             plugins: {
-                legend: { 
+                legend: {
                     display: true,
                     labels: {
-                        color: getComputedStyle(document.body).getPropertyValue('--text-primary')
+                        color: getComputedStyle(document.body)
+                            .getPropertyValue('--text-primary')
                     }
                 }
             }
         }
-    });
+    };
 
-    // Armazena a instância do gráfico no objeto do dispositivo
-    dashboardInstance.devices[deviceId].chart = chartInstance;
-    //console.log(`Gráfico com CP High/Low inicializado para o dispositivo ${deviceId}.`);
+    /* ==========================
+       Configuração do Gráfico 2
+       (BARRAS)
+       ========================== */
+    const chartConfig2 = {
+        type: 'bar',
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: 'V_RMS',
+                    data: [],
+                    backgroundColor: '#2563eb',
+                    borderWidth: 0,
+                    borderRadius: 4
+                },
+                {
+                    label: 'I_RMS',
+                    data: [],
+                    backgroundColor: '#77a6dcff',
+                    borderWidth: 0,
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 0 },
+            scales: {
+                x: {
+                    stacked: false,
+                    grid: { display: false }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: getComputedStyle(document.body)
+                            .getPropertyValue('--text-secondary')
+                    },
+                    grid: {
+                        color: getComputedStyle(document.body)
+                            .getPropertyValue('--border-color')
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        color: getComputedStyle(document.body)
+                            .getPropertyValue('--text-primary')
+                    }
+                }
+            }
+        }
+    };
+
+    /* ==========================
+       Criação dos gráficos
+       ========================== */
+    const chartInstance1 = new Chart(ctx1, chartConfig1);
+    const chartInstance2 = new Chart(ctx2, chartConfig2);
+
+    /* ==========================
+       Armazena as instâncias
+       ========================== */
+    dashboardInstance.devices[deviceId].chart1 = chartInstance1;
+    dashboardInstance.devices[deviceId].chart2 = chartInstance2;
 }
+
+
 
 /**
  * ==============================================================
@@ -397,58 +481,79 @@ export function setupHomeChart(dashboardInstance, pageElement) {
  * (CP_HIGH e CP_LOW) na páina de detalhaes. 
  * ==============================================================
  */
-export function addChartData(chartInstance, cpData) {
-    if (!chartInstance || !cpData) {
-        console.warn("addChartData foi chamada com uma instância de gráfico inválida ou dados ausentes.");
+export function addDetailChartData(chartInstance, data, graphType) {
+    if (!chartInstance || !data) {
+        console.warn("addDetailChartData foi chamada com uma instância de gráfico inválida ou dados ausentes.");
         return;
     }
 
-    const highData = chartInstance.data.datasets[0].data;
-    const lowData = chartInstance.data.datasets[1].data;
-    const labels = chartInstance.data.labels;
+    // ================================
+    // GRÁFICO 1 (LINHA / histórico)
+    // ================================
+    if (graphType === 'cp' && chartInstance.config.type === 'line') {
+        const highData = chartInstance.data.datasets[0].data;
+        const lowData = chartInstance.data.datasets[1].data;
+        const labels = chartInstance.data.labels;
 
-    const MAX_POINTS = 50;
-    
-    // Adiciona novos dados e remove os mais antigos se necessário
-    if (highData.length >= MAX_POINTS) {
-        highData.shift();
-        lowData.shift();
-        labels.shift();
+        const MAX_POINTS = 50;
+
+        // Remove os pontos mais antigos se necessário
+        if (highData.length >= MAX_POINTS) {
+            highData.shift();
+            lowData.shift();
+            labels.shift();
+        }
+
+        // Adiciona os novos valores
+        highData.push(data.cp_high || 0);
+        lowData.push(data.cp_low || 0);
+        labels.push(''); // labels podem ser vazias para linha
+
+        chartInstance.update();
+
+        // Atualiza médias e P2P
+        if (highData.length > 0 && lowData.length > 0) {
+            const highAverage = highData.reduce((a, b) => a + b, 0) / highData.length;
+            const lowAverage = lowData.reduce((a, b) => a + b, 0) / lowData.length;
+
+            const chartContainer = chartInstance.canvas.parentNode;
+            const pageContainer = chartContainer.closest('.app-page');
+            const highAverageElement = pageContainer.querySelector('.cp-high-average-value');
+            const lowAverageElement = pageContainer.querySelector('.cp-low-average-value');
+            const peakToPeakElement = pageContainer.querySelector('.cp-peaktopeak-value');
+
+            if (highAverageElement) highAverageElement.textContent = `${highAverage.toFixed(0)} mV`;
+            if (lowAverageElement) lowAverageElement.textContent = `${lowAverage.toFixed(0)} mV`;
+            if (peakToPeakElement) {
+                const peakToPeak = Math.max(...highData) - Math.min(...highData);
+                peakToPeakElement.textContent = `${peakToPeak.toFixed(0)} mV`;
+            }
+        }
     }
 
-    // Adiciona os novos valores de cp_high e cp_low
-    highData.push(cpData.cp_high || 0);
-    lowData.push(cpData.cp_low || 0);
-    labels.push('');
+    // ================================
+    // GRÁFICO 2 (BARRAS / VRMS)
+    // ================================
+    if (graphType === 'vrms' && chartInstance.config.type === 'bar') {
+        const labels = chartInstance.data.labels;
+        const dataset = chartInstance.data.datasets[0].data; // assumindo 1 dataset com múltiplas barras
 
-    chartInstance.update();
-    
-    // Atualiza as médias se houver dados
-    if (highData.length > 0 && lowData.length > 0) {
-        const highSum = highData.reduce((total, currentValue) => total + currentValue, 0);
-        const lowSum = lowData.reduce((total, currentValue) => total + currentValue, 0);
-        
-        const highAverage = highSum / highData.length;
-        const lowAverage = lowSum / lowData.length;
+        // Inicializa labels e dados se estiver vazio
+        if (labels.length === 0) {
+            labels.push('A', 'B', 'C');
+        }
+        if (dataset.length === 0) {
+            dataset.push(0, 0, 0);
+        }
 
-        // Encontra os elementos para exibir as médias
-        const chartContainer = chartInstance.canvas.parentNode;
-        const pageContainer = chartContainer.closest('.app-page');
-        const highAverageElement = pageContainer.querySelector('.cp-high-average-value');
-        const lowAverageElement = pageContainer.querySelector('.cp-low-average-value');
-        const peakToPeakElement = pageContainer.querySelector('.cp-peaktopeak-value');
+        // Atualiza valores diretamente (ReactiveArray do Chart.js suporta indexação)
+        dataset[0] = data.vrms_a || 0;
+        dataset[1] = data.vrms_b || 0;
+        dataset[2] = data.vrms_c || 0;
 
-        // Atualiza os elementos de média se existirem
-        if (highAverageElement) {
-            highAverageElement.textContent = `${highAverage.toFixed(0)} mV`;
-        }
-        if (lowAverageElement) {
-            lowAverageElement.textContent = `${lowAverage.toFixed(0)} mV`;
-        }
-        if (peakToPeakElement) {
-            const peakToPeak = Math.max(...highData) - Math.min(...highData);
-            peakToPeakElement.textContent = `${peakToPeak.toFixed(0)} mV`;
-        }
+        chartInstance.update();
+
+        // Futuramente aqui você pode adicionar médias, P2P ou outras métricas
     }
 }
 
@@ -620,7 +725,14 @@ export function updateDetailPageUI(dashboardInstance, deviceId, statusName, data
 
         case 'cp_data': {
             if (device) {
-                EVSE.ui.addChartData(device.chart, data);
+                EVSE.ui.addDetailChartData(device.chart1, data, 'cp');
+            }
+            break;
+        }
+        
+        case 'vrms_data': {
+            if (device) {
+                EVSE.ui.addDetailChartData(device.chart2, data, 'vrms');
             }
             break;
         }
