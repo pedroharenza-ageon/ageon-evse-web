@@ -1503,6 +1503,8 @@ html[data-theme="dark"] {
     margin-top: var(--spacing-lg);
     padding: var(--spacing-md);
     box-shadow: var(--shadow-md);
+    margin-bottom: var(--spacing-md);
+
 }
 
 .chart-summary-data {

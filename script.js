@@ -76,7 +76,8 @@ class EVSEDashboard {
             charging_session: null,
             current_state: null,
             chart1: null,
-            chart2: null
+            chart2: null,
+            chart3: null
         };
 
         const statusTopic = MQTT_CONFIG.topics.statusTemplate.replace('{deviceId}', deviceId);
@@ -164,8 +165,8 @@ class EVSEDashboard {
         const powerSessionData = device.charging_session;
         if (powerSessionData) {
             // 1. Atualiza a UI com os últimos dados de potência e energia que temos.
-            detailPage.querySelector('.power-value').innerHTML = `${(powerSessionData.power || 0.00).toFixed(2)} <small>kW</small>`;
-            detailPage.querySelector('.energy-value').innerHTML = `${(powerSessionData.energy || 0.00).toFixed(2)} <small>kWh</small>`;
+            detailPage.querySelector('.power-value').innerHTML = `${(powerSessionData.power || 0.000).toFixed(3)} <small>kW</small>`;
+            detailPage.querySelector('.energy-value').innerHTML = `${(powerSessionData.energy || 0.000).toFixed(3)} <small>kWh</small>`;
             
             // 2. Atualiza o tempo com o último valor recebido do backend.
             this._updateTimerUI(deviceId, powerSessionData.sessionTime || '--:--:--');

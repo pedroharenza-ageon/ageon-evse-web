@@ -242,14 +242,16 @@ export function addDetailEventListeners(dashborad, pageElement, deviceId) {
 export function setupDetailChart(dashboardInstance, pageElement, deviceId) {
     const canvas1 = pageElement.querySelector('.evse-detail-device-chart-1');
     const canvas2 = pageElement.querySelector('.evse-detail-device-chart-2');
+    const canvas3 = pageElement.querySelector('.evse-detail-device-chart-3');
 
-    if (!canvas1 || !canvas2) {
+    if (!canvas1 || !canvas2 || !canvas3) {
         console.error("Canvas para o gráfico de detalhes não encontrado!");
         return;
     }
 
     const ctx1 = canvas1.getContext('2d');
     const ctx2 = canvas2.getContext('2d');
+    const ctx3 = canvas3.getContext('2d');
 
     /* ==========================
        Configuração do Gráfico 1
@@ -394,17 +396,69 @@ export function setupDetailChart(dashboardInstance, pageElement, deviceId) {
         }
     };
 
+    const chartConfig3 = {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: 'Energia Consumida (kWh)',
+                    data: [],
+                    borderColor: '#2563eb',
+                    backgroundColor: '#2563eb',
+                    borderWidth: 2,
+                    fill: false,
+                    pointRadius: 1,
+                    tension: 0.4
+                },
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 0 },
+            scales: {
+                x: {
+                    display: true,
+                    ticks: { maxTicksLimit: 6 }
+                },
+                y: {
+                    beginAtZero: false,
+                    ticks: {
+                        color: getComputedStyle(document.body)
+                            .getPropertyValue('--text-secondary')
+                    },
+                    grid: {
+                        color: getComputedStyle(document.body)
+                            .getPropertyValue('--border-color')
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        color: getComputedStyle(document.body)
+                            .getPropertyValue('--text-primary')
+                    }
+                }
+            }
+        }
+    };
+
     /* ==========================
        Criação dos gráficos
        ========================== */
     const chartInstance1 = new Chart(ctx1, chartConfig1);
     const chartInstance2 = new Chart(ctx2, chartConfig2);
+    const chartInstance3 = new Chart(ctx3, chartConfig3);
 
     /* ==========================
        Armazena as instâncias
        ========================== */
     dashboardInstance.devices[deviceId].chart1 = chartInstance1;
     dashboardInstance.devices[deviceId].chart2 = chartInstance2;
+    dashboardInstance.devices[deviceId].chart3 = chartInstance3;
 }
 
 
@@ -509,7 +563,7 @@ export function addDetailChartData(chartInstance, data, graphType) {
     }
 
     // ================================
-    // GRÁFICO 1 (LINHA / histórico)
+    // GRÁFICO 1 (LINHA / CP)
     // ================================
     if (graphType === 'cp' && chartInstance.config.type === 'line') {
         const highData = chartInstance.data.datasets[0].data;
@@ -553,7 +607,7 @@ export function addDetailChartData(chartInstance, data, graphType) {
     }
 
     // ================================
-    // GRÁFICO 2 (BARRAS / VRMS)
+    // GRÁFICO 2 (BARRAS / VRMS e IRMS)
     // ================================
     if (graphType === 'vrms' && chartInstance.config.type === 'bar') {
         const labels = chartInstance.data.labels;
@@ -594,6 +648,29 @@ export function addDetailChartData(chartInstance, data, graphType) {
 
         chartInstance.update();
     }
+
+    // ================================
+    // GRÁFICO 3 (LINHA / ENERGIA)
+    // ================================
+
+    if (graphType === 'energy' && chartInstance.config.type === 'line') {
+        const energyData = chartInstance.data.datasets[0].data;
+        const labels = chartInstance.data.labels;
+
+        const MAX_POINTS = 50;
+
+        if (energyData.length >= MAX_POINTS) {
+            energyData.shift();
+            labels.shift();
+        }
+
+        energyData.push(data.energy || 0);
+        labels.push(''); // labels podem ser vazias para linha
+
+        chartInstance.update();
+    }
+
+
 }
 
 /**
@@ -782,6 +859,15 @@ export function updateDetailPageUI(dashboardInstance, deviceId, statusName, data
             }
             break;
         }
+
+        case 'charging_session': {
+            if (device) {
+                EVSE.ui.addDetailChartData(device.chart3, data, 'energy');
+            }
+            break;
+        }
+        
+        
 
         case 'debug_data':
             const debugString = JSON.stringify(data, null, 2);
