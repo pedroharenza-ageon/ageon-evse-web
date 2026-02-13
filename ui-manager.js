@@ -181,8 +181,8 @@ export function updateSummaryCardUI(devices, card, stateData, isOnline) {
     
     const powerData = devices[deviceId]?.charging_session;
     if (powerData) {
-        const powerValue = powerData.power || 0.0;
-        card.querySelector('.summary-power').textContent = `${powerValue.toFixed(1)} kW`;
+        const powerValue = powerData.power || 0.00;
+        card.querySelector('.summary-power').textContent = `${powerValue.toFixed(2)} kW`;
     }
 }
 
@@ -867,8 +867,6 @@ export function updateDetailPageUI(dashboardInstance, deviceId, statusName, data
             break;
         }
         
-        
-
         case 'debug_data':
             const debugString = JSON.stringify(data, null, 2);
             alert(`Dados de Debug para ${deviceId}:\n\n${debugString}`);

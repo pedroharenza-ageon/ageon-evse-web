@@ -138,10 +138,8 @@ function handleChargingSession(deviceId, data, dashboardInstance) {
     // Atualiza UI da página de detalhes
     const page = document.getElementById(`page-detail-${deviceId}`);
     if (page && page.classList.contains('active')) {
-        page.querySelector('.power-value').innerHTML = 
-            `${(data.power || 0.0).toFixed(1)} <small>kW</small>`;
-        page.querySelector('.energy-value').innerHTML = 
-            `${(data.energy || 0.0).toFixed(2)} <small>kWh</small>`;
+        page.querySelector('.power-value').innerHTML = `${(data.power || 0.00).toFixed(2)} <small>kW</small>`;
+        page.querySelector('.energy-value').innerHTML = `${(data.energy || 0.000).toFixed(3)} <small>kWh</small>`;
         
         // Atualiza timer
         if (dashboardInstance._updateTimerUI) {
