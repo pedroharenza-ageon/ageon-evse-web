@@ -657,12 +657,12 @@ export function addDetailChartData(chartInstance, data, graphType) {
         const energyData = chartInstance.data.datasets[0].data;
         const labels = chartInstance.data.labels;
 
-        const MAX_POINTS = 50;
+        // const MAX_POINTS = 50;
 
-        if (energyData.length >= MAX_POINTS) {
-            energyData.shift();
-            labels.shift();
-        }
+        // if (energyData.length >= MAX_POINTS) {
+        //     energyData.shift();
+        //     labels.shift();
+        // }
 
         energyData.push(data.energy || 0);
         labels.push(''); // labels podem ser vazias para linha
