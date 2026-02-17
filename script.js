@@ -297,6 +297,18 @@ class EVSEDashboard {
         window.EVSE_MQTT_MANAGER.publishMessage(this.mqttClient, commandTopic, {});
     }
 
+    verifyCurrentOffset(deviceId) {
+        if (!deviceId) {
+            console.error("verifyCurrentOffset chamado sem um deviceId.");
+            return;
+        }
+        console.log(`Enviando comando de verifyCurrentOffset para o dispositivo ${deviceId}...`);
+        const commandTopic = MQTT_CONFIG.topics.commandTemplate
+            .replace('{deviceId}', deviceId)
+            .replace('{commandName}', 'verify_current_offset');
+        window.EVSE_MQTT_MANAGER.publishMessage(this.mqttClient, commandTopic, {});
+    }
+
     changeCurrent(deviceId) {
         if (!deviceId) {
             console.error("changeCurrent chamado sem um deviceId.");
@@ -729,6 +741,11 @@ class EVSEDashboard {
                 this.calibrateCurrent(currentDeviceId);
                 this.addConsoleMessage('SYS', 'calibrating current..', currentDeviceId);
                 return true;
+            
+            case 'verify_current_offset':
+                this.verifyCurrentOffset(currentDeviceId);
+                this.addConsoleMessage('SYS', 'verifying current offset..', currentDeviceId);
+                return true;
         }
         
         return false;
@@ -739,19 +756,20 @@ class EVSEDashboard {
         const currentDeviceId = consoleModal?.dataset.deviceId;
 
         this.addConsoleMessage('SYS', 'Comandos locais disponíveis:', currentDeviceId);
-        this.addConsoleMessage('SYS', 'help ------------------------ Mostra esta ajuda', currentDeviceId);
-        this.addConsoleMessage('SYS', 'clear ----------------------- Limpa o console', currentDeviceId);
-        this.addConsoleMessage('SYS', 'version --------------------- Mostra versão do dashboard', currentDeviceId);
-        this.addConsoleMessage('SYS', 'devices --------------------- Lista dispositivos conectados', currentDeviceId);
-        this.addConsoleMessage('SYS', 'stats ----------------------- Mostra estatísticas do sistema', currentDeviceId);
-        this.addConsoleMessage('SYS', 'tglblock -------------------- Toggle bloqueio', currentDeviceId);
-        this.addConsoleMessage('SYS', 'force_charge 1 -------------- Força início de carregamento', currentDeviceId);
-        this.addConsoleMessage('SYS', 'force_charge 0 -------------- Força parada de carregamento', currentDeviceId);
-        this.addConsoleMessage('SYS', 'force_error ----------------- Força estado de erro ESTADO_F', currentDeviceId);
-        this.addConsoleMessage('SYS', 'reset_rfid ------------------ Reseta configuração RFID', currentDeviceId);
-        this.addConsoleMessage('SYS', 'reset ------------------------ Reseta o EVSE', currentDeviceId);
-        this.addConsoleMessage('SYS', 'gfci_test -------------------- Inicia auto-teste do GFCI', currentDeviceId);
-        this.addConsoleMessage('SYS', 'calibrate_current_offset ----- Inicia calibração de corrente', currentDeviceId);
+        this.addConsoleMessage('SYS', 'help --------------------- Mostra esta ajuda', currentDeviceId);
+        this.addConsoleMessage('SYS', 'clear -------------------- Limpa o console', currentDeviceId);
+        this.addConsoleMessage('SYS', 'version ------------------ Mostra versão do dashboard', currentDeviceId);
+        this.addConsoleMessage('SYS', 'devices ------------------ Lista dispositivos conectados', currentDeviceId);
+        this.addConsoleMessage('SYS', 'stats -------------------- Mostra estatísticas do sistema', currentDeviceId);
+        this.addConsoleMessage('SYS', 'tglblock ----------------- Toggle bloqueio', currentDeviceId);
+        this.addConsoleMessage('SYS', 'force_charge 1 ----------- Força início de carregamento', currentDeviceId);
+        this.addConsoleMessage('SYS', 'force_charge 0 ----------- Força parada de carregamento', currentDeviceId);
+        this.addConsoleMessage('SYS', 'force_error -------------- Força estado de erro ESTADO_F', currentDeviceId);
+        this.addConsoleMessage('SYS', 'reset_rfid --------------- Reseta configuração RFID', currentDeviceId);
+        this.addConsoleMessage('SYS', 'reset -------------------- Reseta o EVSE', currentDeviceId);
+        this.addConsoleMessage('SYS', 'gfci_test ---------------- Inicia auto-teste do GFCI', currentDeviceId);
+        this.addConsoleMessage('SYS', 'calibrate_current_offset - Inicia calibração de corrente', currentDeviceId);
+        this.addConsoleMessage('SYS', 'verify_current_offset ---- Verifica o offset de corrente', currentDeviceId);
         this.addConsoleMessage('SYS', '1.0', currentDeviceId);
     }
 
