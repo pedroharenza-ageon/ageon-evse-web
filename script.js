@@ -285,6 +285,18 @@ class EVSEDashboard {
         window.EVSE_MQTT_MANAGER.publishMessage(this.mqttClient, commandTopic, {});
     }
 
+    calibrateVoltage(deviceId) {
+        if (!deviceId) {
+            console.error("calibrateVoltage chamado sem um deviceId.");
+            return;
+        }
+        console.log(`Enviando comando de calibrateVoltage para o dispositivo ${deviceId}...`);
+        const commandTopic = MQTT_CONFIG.topics.commandTemplate
+            .replace('{deviceId}', deviceId)
+            .replace('{commandName}', 'calibrate_voltage_offset');
+        window.EVSE_MQTT_MANAGER.publishMessage(this.mqttClient, commandTopic, {});
+    }
+
     calibrateCurrent(deviceId) {
         if (!deviceId) {
             console.error("calibrateCurrent chamado sem um deviceId.");
@@ -736,6 +748,11 @@ class EVSEDashboard {
                 this.gfciSelfTest(currentDeviceId);
                 this.addConsoleMessage('SYS', 'running GFCI self-test..', currentDeviceId);
                 return true;
+            
+            case 'calibrate_voltage_offset':
+                this.calibrateVoltage(currentDeviceId);
+                this.addConsoleMessage('SYS', 'calibrating voltage..', currentDeviceId);
+                return true;
 
             case 'calibrate_current_offset':
                 this.calibrateCurrent(currentDeviceId);
@@ -768,6 +785,7 @@ class EVSEDashboard {
         this.addConsoleMessage('SYS', 'reset_rfid --------------- Reseta configuração RFID', currentDeviceId);
         this.addConsoleMessage('SYS', 'reset -------------------- Reseta o EVSE', currentDeviceId);
         this.addConsoleMessage('SYS', 'gfci_test ---------------- Inicia auto-teste do GFCI', currentDeviceId);
+        this.addConsoleMessage('SYS', 'calibrate_voltage_offset - Inicia calibração de tensão', currentDeviceId);
         this.addConsoleMessage('SYS', 'calibrate_current_offset - Inicia calibração de corrente', currentDeviceId);
         this.addConsoleMessage('SYS', 'verify_current_offset ---- Verifica o offset de corrente', currentDeviceId);
         this.addConsoleMessage('SYS', '1.0', currentDeviceId);
