@@ -131,30 +131,43 @@ function notifyStatusUpdate(deviceId, statusName, data, dashboardInstance) {
 /**
  * Processa dados de sessão de carga
  */
+// function handleChargingSession(deviceId, data, dashboardInstance) {
+//     // Atualiza dados da sessão
+//     dashboardInstance.devices[deviceId].charging_session = data;
+
+//     // Atualiza UI da página de detalhes
+//     const page = document.getElementById(`page-detail-${deviceId}`);
+//     if (page && page.classList.contains('active')) {
+//         page.querySelector('.power-value').innerHTML = `${(data.power || 0.00).toFixed(2)} <small>kW</small>`;
+//         page.querySelector('.energy-value').innerHTML = `${(data.energy || 0.000).toFixed(3)} <small>kWh</small>`;
+        
+//         // Atualiza timer
+//         if (dashboardInstance._updateTimerUI) {
+//             dashboardInstance._updateTimerUI(deviceId, data.sessionTime || '--:--:--');
+//         }
+//     }
+    
+//     // Atualiza cartão de resumo
+//     const summaryCard = document.querySelector(`#page-home .device-card-summary[data-device-id="${deviceId}"]`);
+//     if (summaryCard) {
+//         const powerValue = data.power || 0.0;
+//         summaryCard.querySelector('.summary-power').textContent = `${powerValue.toFixed(1)} kW`;
+//     }
+    
+//     // Gerencia timer da sessão
+//     if (dashboardInstance.manageSessionTimer) {
+//         dashboardInstance.manageSessionTimer(deviceId, data.sessionStartTime);
+//     }
+// }
+
 function handleChargingSession(deviceId, data, dashboardInstance) {
-    // Atualiza dados da sessão
+    // Atualiza dados da sessão (estado)
     dashboardInstance.devices[deviceId].charging_session = data;
 
-    // Atualiza UI da página de detalhes
-    const page = document.getElementById(`page-detail-${deviceId}`);
-    if (page && page.classList.contains('active')) {
-        page.querySelector('.power-value').innerHTML = `${(data.power || 0.00).toFixed(2)} <small>kW</small>`;
-        page.querySelector('.energy-value').innerHTML = `${(data.energy || 0.000).toFixed(3)} <small>kWh</small>`;
-        
-        // Atualiza timer
-        if (dashboardInstance._updateTimerUI) {
-            dashboardInstance._updateTimerUI(deviceId, data.sessionTime || '--:--:--');
-        }
-    }
-    
-    // Atualiza cartão de resumo
-    const summaryCard = document.querySelector(`#page-home .device-card-summary[data-device-id="${deviceId}"]`);
-    if (summaryCard) {
-        const powerValue = data.power || 0.0;
-        summaryCard.querySelector('.summary-power').textContent = `${powerValue.toFixed(1)} kW`;
-    }
-    
-    // Gerencia timer da sessão
+    // Atualiza UI separadamente
+    EVSE.ui.chargingSessionUIUpdate(deviceId, data, dashboardInstance);
+
+    // Gerencia timer da sessão (lógica)
     if (dashboardInstance.manageSessionTimer) {
         dashboardInstance.manageSessionTimer(deviceId, data.sessionStartTime);
     }

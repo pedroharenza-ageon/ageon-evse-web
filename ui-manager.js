@@ -186,6 +186,52 @@ export function updateSummaryCardUI(devices, card, stateData, isOnline) {
     }
 }
 
+
+/**
+ * ==============================================================
+ * Função responsável por atualizar a UI da sessão de carga na página de detalhes.
+ * ==============================================================
+ */
+export function chargingSessionUIUpdate(deviceId, data, dashboardInstance) {
+    
+    // Página de detalhes
+    const page = document.getElementById(`page-detail-${deviceId}`);
+    if (page && page.classList.contains('active')) {
+        const powerEl = page.querySelector('.power-value');
+        const energyEl = page.querySelector('.energy-value');
+
+        if (powerEl) {
+            powerEl.innerHTML = `${(data.power ?? 0).toFixed(3)} <small>kW</small>`;
+        }
+
+        if (energyEl) {
+            energyEl.innerHTML = `${(data.energy ?? 0).toFixed(5)} <small>kWh</small>`;
+        }
+
+        // Timer visual
+        if (dashboardInstance._updateTimerUI) {
+            dashboardInstance._updateTimerUI(
+                deviceId, 
+                data.sessionTime || '--:--:--'
+            );
+        }
+    }
+
+    // Cartão de resumo
+    const summaryCard = document.querySelector(
+        `#page-home .device-card-summary[data-device-id="${deviceId}"]`
+    );
+
+    if (summaryCard) {
+        const powerValue = data.power ?? 0;
+        const summaryPower = summaryCard.querySelector('.summary-power');
+
+        if (summaryPower) {
+            summaryPower.textContent = `${powerValue.toFixed(1)} kW`;
+        }
+    }
+}
+
 /**
  * ==============================================================
  * Função responsável por criar os cards de cada estação de recarga
