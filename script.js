@@ -321,6 +321,18 @@ class EVSEDashboard {
         window.EVSE_MQTT_MANAGER.publishMessage(this.mqttClient, commandTopic, {});
     }
 
+    verifyVoltageOffset(deviceId) {
+        if (!deviceId) {
+            console.error("verifyVoltageOffset chamado sem um deviceId.");
+            return;
+        }
+        console.log(`Enviando comando de verifyVoltageOffset para o dispositivo ${deviceId}...`);
+        const commandTopic = MQTT_CONFIG.topics.commandTemplate
+            .replace('{deviceId}', deviceId)
+            .replace('{commandName}', 'verify_voltage_offset');
+        window.EVSE_MQTT_MANAGER.publishMessage(this.mqttClient, commandTopic, {});
+    }
+
     changeCurrent(deviceId) {
         if (!deviceId) {
             console.error("changeCurrent chamado sem um deviceId.");
@@ -763,6 +775,11 @@ class EVSEDashboard {
                 this.verifyCurrentOffset(currentDeviceId);
                 this.addConsoleMessage('SYS', 'verifying current offset..', currentDeviceId);
                 return true;
+
+            case 'verify_voltage_offset':
+                this.verifyVoltageOffset(currentDeviceId);
+                this.addConsoleMessage('SYS', 'verifying voltage offset..', currentDeviceId);
+                return true;
         }
         
         return false;
@@ -788,6 +805,7 @@ class EVSEDashboard {
         this.addConsoleMessage('SYS', 'calibrate_voltage_offset - Inicia calibração de tensão', currentDeviceId);
         this.addConsoleMessage('SYS', 'calibrate_current_offset - Inicia calibração de corrente', currentDeviceId);
         this.addConsoleMessage('SYS', 'verify_current_offset ---- Verifica o offset de corrente', currentDeviceId);
+        this.addConsoleMessage('SYS', 'verify_voltage_offset ---- Verifica o offset de tensão', currentDeviceId);
         this.addConsoleMessage('SYS', '1.0', currentDeviceId);
     }
 

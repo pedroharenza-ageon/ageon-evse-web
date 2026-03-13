@@ -365,27 +365,77 @@ export function setupDetailChart(dashboardInstance, pageElement, deviceId) {
 
     /* ==========================
        Configuração do Gráfico 2
-       (BARRAS)
        ========================== */
     const chartConfig2 = {
-        type: 'bar',
+        type: 'line', 
         data: {
-            labels: [],
+            labels: [], 
             datasets: [
+                // Datasets de Tensão (VAC) - Eixo Y Esquerdo
                 {
-                    label: 'VAC',
+                    label: 'VAC LA',
                     data: [],
+                    borderColor: '#2563eb',
                     backgroundColor: '#2563eb',
-                    borderWidth: 0,
-                    borderRadius: 4,
+                    borderWidth: 2,
+                    fill: false,
+                    pointRadius: 1,
+                    tension: 0.4,
                     yAxisID: 'y',
                 },
                 {
-                    label: 'IAC',
+                    label: 'VAC LB',
                     data: [],
+                    borderColor: '#1d4ed8',
+                    backgroundColor: '#1d4ed8',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    tension: 0.3,
+                    fill: false,
+                    pointRadius: 1,
+                    tension: 0.4,
+                    yAxisID: 'y',
+                },
+                {
+                    label: 'VAC LC',
+                    data: [],
+                    borderColor: '#1e40af',
+                    backgroundColor: '#1e40af',
+                    borderWidth: 2,
+                    fill: false,
+                    pointRadius: 1,
+                    tension: 0.4,
+                    yAxisID: 'y',
+                },
+                // Datasets de Corrente (IAC) - Eixo Y Direito
+                {
+                    label: 'IAC LA',
+                    data: [],
+                    borderColor: '#77a6dcff',
                     backgroundColor: '#77a6dcff',
-                    borderWidth: 0,
-                    borderRadius: 4,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    tension: 0.3,
+                    yAxisID: 'y1',
+                },
+                {
+                    label: 'IAC LB',
+                    data: [],
+                    borderColor: '#93c5fd',
+                    backgroundColor: '#93c5fd',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    tension: 0.3,
+                    yAxisID: 'y1',
+                },
+                {
+                    label: 'IAC LC',
+                    data: [],
+                    borderColor: '#bfdbfe',
+                    backgroundColor: '#bfdbfe',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    tension: 0.3,
                     yAxisID: 'y1',
                 }
             ]
@@ -393,40 +443,33 @@ export function setupDetailChart(dashboardInstance, pageElement, deviceId) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            animation: { duration: 0 },
+            animation: { duration: 0 }, 
             scales: {
                 x: {
-                    stacked: false,
-                    grid: { display: false }
+                    display: true,
+                    ticks: { maxTicksLimit: 6 }
                 },
                 y: {
-                    type: 'linear',
-                    position: 'left',
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Tensão (VAC)'
-                    },
+                    beginAtZero: false,
                     ticks: {
-                        color: getComputedStyle(document.body).getPropertyValue('--text-secondary')
+                        color: getComputedStyle(document.body)
+                            .getPropertyValue('--text-secondary')
                     },
                     grid: {
-                        color: getComputedStyle(document.body).getPropertyValue('--border-color')
+                        color: getComputedStyle(document.body)
+                            .getPropertyValue('--border-color')
                     }
                 },
                 y1: {
-                    type: 'linear',
+                    beginAtZero: false,
                     position: 'right',
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Corrente (A)'
-                    },
                     ticks: {
-                        color: getComputedStyle(document.body).getPropertyValue('--text-secondary')
+                        color: getComputedStyle(document.body)
+                            .getPropertyValue('--text-secondary')
                     },
                     grid: {
-                        drawOnChartArea: false // evita sobreposição da grid do eixo Y principal
+                        color: getComputedStyle(document.body)
+                            .getPropertyValue('--border-color')
                     }
                 }
             },
@@ -441,6 +484,10 @@ export function setupDetailChart(dashboardInstance, pageElement, deviceId) {
             }
         }
     };
+
+    /* ==========================
+       Configuração do Gráfico 3
+       ========================== */
 
     const chartConfig3 = {
         type: 'line',
@@ -655,43 +702,54 @@ export function addDetailChartData(chartInstance, data, graphType) {
     // ================================
     // GRÁFICO 2 (BARRAS / VRMS e IRMS)
     // ================================
-    if (graphType === 'vrms' && chartInstance.config.type === 'bar') {
+    if (graphType === 'vrms' && chartInstance.config.type === 'line') {
         const labels = chartInstance.data.labels;
-        const dataset = chartInstance.data.datasets[0].data; // assumindo 1 dataset com múltiplas barras
+        const v1data = chartInstance.data.datasets[0].data;
+        const v2data = chartInstance.data.datasets[1].data;
+        const v3data = chartInstance.data.datasets[2].data;
 
-        // Inicializa labels e dados se estiver vazio
-        if (labels.length === 0) {
-            labels.push('L1', 'L2', 'L3');
+        const MAX_POINTS = 50;
+
+        if (v1data.length >= MAX_POINTS) {
+            v1data.shift();
+            v2data.shift();
+            v3data.shift();
+            labels.shift();
         }
-        if (dataset.length === 0) {
-            dataset.push(0, 0, 0);
-        }
 
-        // Atualiza valores diretamente (ReactiveArray do Chart.js suporta indexação)
-        dataset[0] = data.V1 || 0;
-        dataset[1] = data.V2 || 0;
-        dataset[2] = data.V3 || 0;
-
-        chartInstance.update();
+        // Atualiza cada dataset de Tensão (Índices 0, 1 e 2 na nossa configuração)
+        // Dataset 0: VAC - Fase A
+        // Dataset 1: VAC - Fase B
+        // Dataset 2: VAC - Fase C
+        v1data.push(data.V1 || 0);
+        v2data.push(data.V2 || 0);
+        v3data.push(data.V3 || 0);
     }
 
-    if (graphType === 'irms' && chartInstance.config.type === 'bar') {
+    if (graphType === 'irms' && chartInstance.config.type === 'line') {
         const labels = chartInstance.data.labels;
-        const dataset = chartInstance.data.datasets[1].data; // assumindo 1 dataset com múltiplas barras
+        const i1data = chartInstance.data.datasets[3].data;
+        const i2data = chartInstance.data.datasets[4].data;
+        const i3data = chartInstance.data.datasets[5].data;
 
-        // Inicializa labels e dados se estiver vazio
-        if (labels.length === 0) {
-            labels.push('L1', 'L2', 'L3');
+        const MAX_POINTS = 50;
+
+        if (i1data.length >= MAX_POINTS) {
+            i1data.shift();
+            i2data.shift();
+            i3data.shift();
+            labels.shift();
         }
-        if (dataset.length === 0) {
-            dataset.push(0, 0, 0);
-        }
 
-        // Atualiza valores diretamente (ReactiveArray do Chart.js suporta indexação)
-        dataset[0] = data.I1 || 0;
-        dataset[1] = data.I2 || 0;
-        dataset[2] = data.I3 || 0;
+        // Atualiza cada dataset de Corrente (Índices 3, 4 e 5 na nossa configuração)
+        // Dataset 3: IAC - Fase A
+        // Dataset 4: IAC - Fase B
+        // Dataset 5: IAC - Fase C
+        i1data.push(data.I1 || 0);
+        i2data.push(data.I2 || 0);
+        i3data.push(data.I3 || 0);
 
+        labels.push('');
         chartInstance.update();
     }
 
