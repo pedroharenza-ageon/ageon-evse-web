@@ -389,7 +389,6 @@ export function setupDetailChart(dashboardInstance, pageElement, deviceId) {
                     borderColor: '#1d4ed8',
                     backgroundColor: '#1d4ed8',
                     borderWidth: 2,
-                    pointRadius: 0,
                     tension: 0.3,
                     fill: false,
                     pointRadius: 1,
@@ -414,8 +413,9 @@ export function setupDetailChart(dashboardInstance, pageElement, deviceId) {
                     borderColor: '#77a6dcff',
                     backgroundColor: '#77a6dcff',
                     borderWidth: 2,
-                    pointRadius: 0,
-                    tension: 0.3,
+                    fill: false,
+                    pointRadius: 1,
+                    tension: 0.4,
                     yAxisID: 'y1',
                 },
                 {
@@ -424,8 +424,9 @@ export function setupDetailChart(dashboardInstance, pageElement, deviceId) {
                     borderColor: '#93c5fd',
                     backgroundColor: '#93c5fd',
                     borderWidth: 2,
-                    pointRadius: 0,
-                    tension: 0.3,
+                    fill: false,
+                    pointRadius: 1,
+                    tension: 0.4,
                     yAxisID: 'y1',
                 },
                 {
@@ -434,8 +435,9 @@ export function setupDetailChart(dashboardInstance, pageElement, deviceId) {
                     borderColor: '#bfdbfe',
                     backgroundColor: '#bfdbfe',
                     borderWidth: 2,
-                    pointRadius: 0,
-                    tension: 0.3,
+                    fill: false,
+                    pointRadius: 1,
+                    tension: 0.4,
                     yAxisID: 'y1',
                 }
             ]
@@ -714,7 +716,6 @@ export function addDetailChartData(chartInstance, data, graphType) {
             v1data.shift();
             v2data.shift();
             v3data.shift();
-            labels.shift();
         }
 
         // Atualiza cada dataset de Tensão (Índices 0, 1 e 2 na nossa configuração)
