@@ -345,6 +345,37 @@ class EVSEDashboard {
         window.EVSE_MQTT_MANAGER.publishMessage(this.mqttClient, commandTopic, {});
     }
 
+    logVoltage(deviceId) {
+        if (!deviceId) {
+            console.error("logVoltage chamado sem um deviceId.");
+            return;
+        }
+        console.log(`Enviando comando de voltegeLog para o dispositivo ${deviceId}...`);
+        const commandTopic = MQTT_CONFIG.topics.commandTemplate
+            .replace('{deviceId}', deviceId)
+            .replace('{commandName}', 'log_voltage')
+        window.EVSE_MQTT_MANAGER.publishMessage(this.mqttClient, commandTopic, {});
+    }
+
+    setCalibrationGain(deviceId, calibration_var, gain) {
+        if (!deviceId) {
+            console.error("setCalibrationGain chamado sem um deviceId.");
+            return;
+        }
+        console.log(`Enviando comando de setCalibrationGain para o dispositivo ${deviceId}...`);
+        const commandTopic = MQTT_CONFIG.topics.commandTemplate
+            .replace('{deviceId}', deviceId)
+            .replace('{commandName}', 'set_calibration_gain');
+        
+        // O payload agora inclui o valor de 'gain' e 'phase'
+        const payload = {
+            calibration_var: calibration_var,
+            gain: gain
+        };
+
+        window.EVSE_MQTT_MANAGER.publishMessage(this.mqttClient, commandTopic, payload);
+    }
+
     changeCurrent(deviceId) {
         if (!deviceId) {
             console.error("changeCurrent chamado sem um deviceId.");
@@ -702,6 +733,60 @@ class EVSEDashboard {
         const consoleModal = document.getElementById('console-modal');
         const currentDeviceId = consoleModal?.dataset.deviceId;
         
+        if (lowerCommand.startsWith("set_calibration_gain ")) {
+            const parts = lowerCommand.substring("set_calibration_gain ".length).trim().split(/\s+/);
+
+            if (parts.length === 2) {
+                const phase = parts[0];
+                const gainStr = parts[1];
+
+                const validPhases = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"];
+
+                if (!validPhases.includes(phase)) {
+                    this.addConsoleMessage("SYS", "Erro: Fase inválida. Use 1–15", currentDeviceId);
+                    return true;
+                }
+
+                let gain;
+                const isCompensation = ["4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"].includes(phase);
+
+                // 🔹 Tratamento para gain_comp (uint16_t)
+                if (isCompensation) {
+                    if (/^0x[0-9a-fA-F]+$/.test(gainStr)) {
+                        gain = parseInt(gainStr, 16);
+                    } else if (/^\d+$/.test(gainStr)) {
+                        gain = parseInt(gainStr, 10);
+                    } else {
+                        this.addConsoleMessage("SYS", "Erro: valor inválido. Use hexadecimal (0x...) ou decimal (0–65535)", currentDeviceId);
+                        return true;
+                    }
+
+                    if (gain < 0 || gain > 0xFFFF) {
+                        this.addConsoleMessage("SYS", "Erro: valor fora do range uint16_t (0–65535)", currentDeviceId);
+                        return true;
+                    }
+                } 
+                // 🔹 Tratamento para fases normais (float)
+                else {
+                    gain = parseFloat(gainStr);
+
+                    if (isNaN(gain)) {
+                        this.addConsoleMessage("SYS", "Erro: valor de gain inválido (use número decimal)", currentDeviceId);
+                        return true;
+                    }
+                }
+
+                // ✅ Executa comando
+                this.setCalibrationGain(currentDeviceId, phase, gain);
+                this.addConsoleMessage("SYS",`Calibration gain "${phase}" configurado para ${gain}`, currentDeviceId);
+
+            } else {
+                this.addConsoleMessage("SYS", "Erro: Formato inválido. Use: set_power_gain <fase> <valor>", currentDeviceId);
+            }
+
+            return true;
+        }
+
         switch (lowerCommand) {
             case 'help':
                 this.showLocalHelp();
@@ -713,7 +798,7 @@ class EVSEDashboard {
                 return true;
                 
             case 'version':
-                this.addConsoleMessage('SYS', 'EVSE Dashboard v1.0.0', currentDeviceId);
+                this.addConsoleMessage('SYS', 'EVSE Dashboard v1.5.8', currentDeviceId);
                 return true;
                 
             case 'devices':
@@ -797,6 +882,15 @@ class EVSEDashboard {
                 this.verifyPowerOffset(currentDeviceId);
                 this.addConsoleMessage('SYS', 'verifying power offset..', currentDeviceId);
                 return true;   
+            
+            case 'debug':
+                this.sendDebugCommand(currentDeviceId);
+                this.addConsoleMessage('SYS', 'send debug command');
+                return true;
+            
+            case 'log_voltage':
+                this.logVoltage(currentDeviceId);
+                this.addConsoleMessage('SYS', 'log voltage ring buffer');
         }
         
         return false;
@@ -804,27 +898,42 @@ class EVSEDashboard {
 
     showLocalHelp() {
         const consoleModal = document.getElementById('console-modal');
-        const currentDeviceId = consoleModal?.dataset.deviceId;
 
-        this.addConsoleMessage('SYS', 'Comandos locais disponíveis:', currentDeviceId);
-        this.addConsoleMessage('SYS', 'help --------------------- Mostra esta ajuda', currentDeviceId);
-        this.addConsoleMessage('SYS', 'clear -------------------- Limpa o console', currentDeviceId);
-        this.addConsoleMessage('SYS', 'version ------------------ Mostra versão do dashboard', currentDeviceId);
-        this.addConsoleMessage('SYS', 'devices ------------------ Lista dispositivos conectados', currentDeviceId);
-        this.addConsoleMessage('SYS', 'stats -------------------- Mostra estatísticas do sistema', currentDeviceId);
-        this.addConsoleMessage('SYS', 'tglblock ----------------- Toggle bloqueio', currentDeviceId);
-        this.addConsoleMessage('SYS', 'force_charge 1 ----------- Força início de carregamento', currentDeviceId);
-        this.addConsoleMessage('SYS', 'force_charge 0 ----------- Força parada de carregamento', currentDeviceId);
-        this.addConsoleMessage('SYS', 'force_error -------------- Força estado de erro ESTADO_F', currentDeviceId);
-        this.addConsoleMessage('SYS', 'reset_rfid --------------- Reseta configuração RFID', currentDeviceId);
-        this.addConsoleMessage('SYS', 'reset -------------------- Reseta o EVSE', currentDeviceId);
-        this.addConsoleMessage('SYS', 'gfci_test ---------------- Inicia auto-teste do GFCI', currentDeviceId);
-        this.addConsoleMessage('SYS', 'calibrate_voltage_offset - Inicia calibração de tensão', currentDeviceId);
-        this.addConsoleMessage('SYS', 'calibrate_current_offset - Inicia calibração de corrente', currentDeviceId);
-        this.addConsoleMessage('SYS', 'verify_current_offset ---- Verifica o offset de corrente', currentDeviceId);
-        this.addConsoleMessage('SYS', 'verify_voltage_offset ---- Verifica o offset de tensão', currentDeviceId);
-        this.addConsoleMessage('SYS', 'verify_power_offset ------ Verifica o offset de potência', currentDeviceId);
-        this.addConsoleMessage('SYS', '1.0', currentDeviceId);
+        this.addConsoleMessage('SYS', 'Comandos locais disponíveis:');
+        this.addConsoleMessage('SYS', 'help -------------------------------------- Mostra esta ajuda');
+        this.addConsoleMessage('SYS', 'clear ------------------------------------- Limpa o console');
+        this.addConsoleMessage('SYS', 'version ----------------------------------- Mostra versão do dashboard');
+        this.addConsoleMessage('SYS', 'devices ----------------------------------- Lista dispositivos conectados');
+        this.addConsoleMessage('SYS', 'stats ------------------------------------- Mostra estatísticas do sistema');
+        this.addConsoleMessage('SYS', 'tglblock ---------------------------------- Toggle bloqueio');
+        this.addConsoleMessage('SYS', 'force_charge bool ------------------------- Força carregamento');
+        this.addConsoleMessage('SYS', 'force_error ------------------------------- Força estado de erro ESTADO_F');
+        this.addConsoleMessage('SYS', 'reset_rfid -------------------------------- Reseta configuração RFID');
+        this.addConsoleMessage('SYS', 'reset ------------------------------------- Reseta o EVSE');
+        this.addConsoleMessage('SYS', 'gfci_test --------------------------------- Inicia auto-teste do GFCI');
+        this.addConsoleMessage('SYS', 'calibrate_voltage_offset ------------------ Inicia calibração de tensão');
+        this.addConsoleMessage('SYS', 'calibrate_current_offset ------------------ Inicia calibração de corrente');
+        this.addConsoleMessage('SYS', 'verify_current_offset --------------------- Verifica o offset de corrente');
+        this.addConsoleMessage('SYS', 'verify_voltage_offset --------------------- Verifica o offset de tensão');
+        this.addConsoleMessage('SYS', 'verify_power_offset ----------------------- Verifica o offset de potência');
+        this.addConsoleMessage('SYS', 'set_calibration_gain fase/comp ganho ------ Seta o ganho de potência');
+        this.addConsoleMessage('SYS', '01 - power_gain_a');
+        this.addConsoleMessage('SYS', '02 - power_gain_b');
+        this.addConsoleMessage('SYS', '03 - power_gain_c');
+        this.addConsoleMessage('SYS', '04 - gain_comp_1_a');
+        this.addConsoleMessage('SYS', '05 - gain_comp_2_a');
+        this.addConsoleMessage('SYS', '06 - gain_comp_1_b');
+        this.addConsoleMessage('SYS', '07 - gain_comp_2_b');
+        this.addConsoleMessage('SYS', '08 - gain_comp_1_c');
+        this.addConsoleMessage('SYS', '09 - gain_comp_2_c');
+        this.addConsoleMessage('SYS', '10 - voltage_gain_a');
+        this.addConsoleMessage('SYS', '11 - voltage_gain_b');
+        this.addConsoleMessage('SYS', '12 - voltage_gain_c');
+        this.addConsoleMessage('SYS', '13 - current_gain_a');
+        this.addConsoleMessage('SYS', '14 - current_gain_b');
+        this.addConsoleMessage('SYS', '15 - current_gain_c');
+        this.addConsoleMessage('SYS', 'debug ------------------------------------- Send debug command');
+        this.addConsoleMessage('SYS', 'log_voltage ------------------------------- Log voltage');
     }
 
     addConsoleMessage(tag, message, sourceDeviceId = null) {

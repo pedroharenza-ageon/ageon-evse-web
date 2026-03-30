@@ -1678,7 +1678,6 @@ html[data-theme="dark"] {
 .console-modal-content {
     max-width: 1400px;
     max-height: 96vh;
-
 }
 
 .modal-header .console-actions {
@@ -1774,8 +1773,8 @@ html[data-theme="dark"] {
     line-height: 1.5;
     border-radius: 4px;
     margin: 0 20px 20px;
-    max-height: 400px;
-    min-height: 500px;
+    min-height: 1100px;
+    max-height: 1100px;
 }
 
 .console-empty-state {
@@ -1934,6 +1933,7 @@ html[data-theme="dark"] {
     .console-modal-content {
         max-width: 95%;
         width: 95%;
+        min-height: 500px;
     }
     
     .console-controls {
@@ -1955,6 +1955,8 @@ html[data-theme="dark"] {
         padding: 3px;
         margin: 0 10px 10px;
         font-size: 9px;
+        min-height: 600px;
+        max-height: 600px;
     }
     
     .console-footer {
