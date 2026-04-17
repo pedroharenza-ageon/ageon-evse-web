@@ -702,7 +702,7 @@ export function addDetailChartData(chartInstance, data, graphType) {
     }
 
     // ================================
-    // GRÁFICO 2 (BARRAS / VRMS e IRMS)
+    // GRÁFICO 2 (VRMS e IRMS)
     // ================================
     if (graphType === 'vrms' && chartInstance.config.type === 'line') {
         const labels = chartInstance.data.labels;
@@ -725,6 +725,21 @@ export function addDetailChartData(chartInstance, data, graphType) {
         v1data.push(data.V1 || 0);
         v2data.push(data.V2 || 0);
         v3data.push(data.V3 || 0);
+
+        if (v1data.length > 0 && v2data.length > 0 && v3data.length > 0) {
+            const v1Average = v1data.reduce((a, b) => a + b, 0) / v1data.length;
+            const v2Average = v2data.reduce((a, b) => a + b, 0) / v2data.length;
+            const v3Average = v3data.reduce((a, b) => a + b, 0) / v3data.length;
+            const chartContainer = chartInstance.canvas.parentNode;
+            const pageContainer = chartContainer.closest('.app-page');
+            const v1AverageElement = pageContainer.querySelector('.vla-average-value');
+            const v2AverageElement = pageContainer.querySelector('.vlb-average-value');
+            const v3AverageElement = pageContainer.querySelector('.vlc-average-value');
+
+            if (v1AverageElement) v1AverageElement.textContent = `${v1Average.toFixed(0)} V`;
+            if (v2AverageElement) v2AverageElement.textContent = `${v2Average.toFixed(0)} V`;
+            if (v3AverageElement) v3AverageElement.textContent = `${v3Average.toFixed(0)} V`;
+        }
     }
 
     if (graphType === 'irms' && chartInstance.config.type === 'line') {
@@ -749,6 +764,21 @@ export function addDetailChartData(chartInstance, data, graphType) {
         i1data.push(data.I1 || 0);
         i2data.push(data.I2 || 0);
         i3data.push(data.I3 || 0);
+
+        if (i1data.length > 0 && i2data.length > 0 && i3data.length > 0) {
+            const i1Average = i1data.reduce((a, b) => a + b, 0) / i1data.length;
+            const i2Average = i2data.reduce((a, b) => a + b, 0) / i2data.length;
+            const i3Average = i3data.reduce((a, b) => a + b, 0) / i3data.length;
+            const chartContainer = chartInstance.canvas.parentNode;
+            const pageContainer = chartContainer.closest('.app-page');
+            const i1AverageElement = pageContainer.querySelector('.ila-average-value');
+            const i2AverageElement = pageContainer.querySelector('.ilb-average-value');
+            const i3AverageElement = pageContainer.querySelector('.ilc-average-value');
+
+            if (i1AverageElement) i1AverageElement.textContent = `${i1Average.toFixed(2)} A`;
+            if (i2AverageElement) i2AverageElement.textContent = `${i2Average.toFixed(2)} A`;
+            if (i3AverageElement) i3AverageElement.textContent = `${i3Average.toFixed(2)} A`;
+        }
 
         labels.push('');
         chartInstance.update();

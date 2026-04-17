@@ -1513,6 +1513,7 @@ html[data-theme="dark"] {
     box-shadow: var(--shadow-md);
     padding: var(--spacing-md);
     margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
     display: flex;
     align-items: center;
     flex-direction: row;
@@ -1526,6 +1527,7 @@ html[data-theme="dark"] {
         box-shadow: var(--shadow-md);
         padding: var(--spacing-md);
         margin-top: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
         display: grid;
         grid-template-columns: auto auto;
         align-items: center;
