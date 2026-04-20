@@ -736,9 +736,9 @@ export function addDetailChartData(chartInstance, data, graphType) {
             const v2AverageElement = pageContainer.querySelector('.vlb-average-value');
             const v3AverageElement = pageContainer.querySelector('.vlc-average-value');
 
-            if (v1AverageElement) v1AverageElement.textContent = `${v1Average.toFixed(0)} V`;
-            if (v2AverageElement) v2AverageElement.textContent = `${v2Average.toFixed(0)} V`;
-            if (v3AverageElement) v3AverageElement.textContent = `${v3Average.toFixed(0)} V`;
+            if (v1AverageElement) v1AverageElement.textContent = `${v1Average.toFixed(2)} V`;
+            if (v2AverageElement) v2AverageElement.textContent = `${v2Average.toFixed(2)} V`;
+            if (v3AverageElement) v3AverageElement.textContent = `${v3Average.toFixed(2)} V`;
         }
     }
 
