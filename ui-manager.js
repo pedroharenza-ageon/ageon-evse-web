@@ -373,7 +373,7 @@ export function setupDetailChart(dashboardInstance, pageElement, deviceId) {
             datasets: [
                 // Datasets de Tensão (VAC) - Eixo Y Esquerdo
                 {
-                    label: 'VAC LA',
+                    label: 'Vrms A',
                     data: [],
                     borderColor: '#2563eb',
                     backgroundColor: '#2563eb',
@@ -384,7 +384,7 @@ export function setupDetailChart(dashboardInstance, pageElement, deviceId) {
                     yAxisID: 'y',
                 },
                 {
-                    label: 'VAC LB',
+                    label: 'Vrms B',
                     data: [],
                     borderColor: '#1d4ed8',
                     backgroundColor: '#1d4ed8',
@@ -396,7 +396,7 @@ export function setupDetailChart(dashboardInstance, pageElement, deviceId) {
                     yAxisID: 'y',
                 },
                 {
-                    label: 'VAC LC',
+                    label: 'Vrms C',
                     data: [],
                     borderColor: '#1e40af',
                     backgroundColor: '#1e40af',
@@ -408,7 +408,7 @@ export function setupDetailChart(dashboardInstance, pageElement, deviceId) {
                 },
                 // Datasets de Corrente (IAC) - Eixo Y Direito
                 {
-                    label: 'IAC LA',
+                    label: 'Irms A',
                     data: [],
                     borderColor: '#77a6dcff',
                     backgroundColor: '#77a6dcff',
@@ -419,7 +419,7 @@ export function setupDetailChart(dashboardInstance, pageElement, deviceId) {
                     yAxisID: 'y1',
                 },
                 {
-                    label: 'IAC LB',
+                    label: 'Irms B',
                     data: [],
                     borderColor: '#93c5fd',
                     backgroundColor: '#93c5fd',
@@ -430,7 +430,7 @@ export function setupDetailChart(dashboardInstance, pageElement, deviceId) {
                     yAxisID: 'y1',
                 },
                 {
-                    label: 'IAC LC',
+                    label: 'Irms C',
                     data: [],
                     borderColor: '#bfdbfe',
                     backgroundColor: '#bfdbfe',
@@ -719,9 +719,9 @@ export function addDetailChartData(chartInstance, data, graphType) {
         }
 
         // Atualiza cada dataset de Tensão (Índices 0, 1 e 2 na nossa configuração)
-        // Dataset 0: VAC - Fase A
-        // Dataset 1: VAC - Fase B
-        // Dataset 2: VAC - Fase C
+        // Dataset 0: Vrms A
+        // Dataset 1: Vrms B
+        // Dataset 2: Vrms C
         v1data.push(data.V1 || 0);
         v2data.push(data.V2 || 0);
         v3data.push(data.V3 || 0);
@@ -758,9 +758,9 @@ export function addDetailChartData(chartInstance, data, graphType) {
         }
 
         // Atualiza cada dataset de Corrente (Índices 3, 4 e 5 na nossa configuração)
-        // Dataset 3: IAC - Fase A
-        // Dataset 4: IAC - Fase B
-        // Dataset 5: IAC - Fase C
+        // Dataset 3: Irms A
+        // Dataset 4: Irms B
+        // Dataset 5: Irms C
         i1data.push(data.I1 || 0);
         i2data.push(data.I2 || 0);
         i3data.push(data.I3 || 0);
