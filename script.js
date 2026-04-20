@@ -776,7 +776,7 @@ class EVSEDashboard {
                     }
                 }
 
-                // ✅ Executa comando
+                // Executa comando
                 this.setCalibrationGain(currentDeviceId, phase, gain);
                 this.addConsoleMessage("SYS",`Calibration gain "${phase}" configurado para ${gain}`, currentDeviceId);
 

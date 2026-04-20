@@ -34,7 +34,7 @@
                 <div id="page-home" class="app-page active">
                 </div>
             </div>
-            <p style="font-size: 12px;">Versão 1.6.0</p>
+            <p style="font-size: 12px;">Versão 1.6.1</p>
         </main>
 
         <nav class="bottom-nav">
@@ -493,11 +493,18 @@
                 <canvas class="evse-detail-device-chart-1"></canvas>
             </div>
 
-            <div class="chart-summary-data">
-                <div class="summary-data-label">Média do Sinal CP High:</div>
-                <div class="summary-data-value cp-high-average-value">-- mV</div>
-                <div class="summary-data-label">Pico a Pico do Sinal CP High:</div>
-                <div class="summary-data-value cp-peaktopeak-value">-- mV</div>
+            <div class="summary-grid summary-grid--2">
+                <div class="summary-title">Sinal CP High</div>
+
+                <div class="summary-item">
+                    <div class="summary-data-label">Média</div>
+                    <div class="summary-data-value cp-high-average-value">-- mV</div>
+                </div>
+
+                <div class="summary-item">
+                    <div class="summary-data-label">Pico a Pico</div>
+                    <div class="summary-data-value cp-peaktopeak-value">-- mV</div>
+                </div>
             </div>
 
             <div class="detail-actions">
@@ -518,26 +525,38 @@
                 <canvas class="evse-detail-device-chart-2"></canvas>
             </div>
 
-            <div class="chart-summary-data">
-                <div class="summary-title">Média</div>
+            <div class="summary-grid summary-grid--3">
+                <div class="summary-title">Médias de Tensão e Corrente</div>
 
-                <div class="summary-data-label">VLA:</div>
-                <div class="summary-data-value vla-average-value">-- V</div>
+                <div class="summary-item">
+                    <div class="summary-data-label">VLA</div>
+                    <div class="summary-data-value vla-average-value">-- V</div>
+                </div>
 
-                <div class="summary-data-label">VLB:</div>
-                <div class="summary-data-value vlb-average-value">-- V</div>
+                <div class="summary-item">
+                    <div class="summary-data-label">VLB</div>
+                    <div class="summary-data-value vlb-average-value">-- V</div>
+                </div>
 
-                <div class="summary-data-label">VLC:</div>
-                <div class="summary-data-value vlc-average-value">-- V</div>
+                <div class="summary-item">
+                    <div class="summary-data-label">VLC</div>
+                    <div class="summary-data-value vlc-average-value">-- V</div>
+                </div>
 
-                <div class="summary-data-label">ILA:</div>
-                <div class="summary-data-value ila-average-value">-- A</div>
+                <div class="summary-item">
+                    <div class="summary-data-label">ILA</div>
+                    <div class="summary-data-value ila-average-value">-- A</div>
+                </div>
 
-                <div class="summary-data-label">ILB:</div>
-                <div class="summary-data-value ilb-average-value">-- A</div>
+                <div class="summary-item">
+                    <div class="summary-data-label">ILB</div>
+                    <div class="summary-data-value ilb-average-value">-- A</div>
+                </div>
 
-                <div class="summary-data-label">ILC:</div>
-                <div class="summary-data-value ilc-average-value">-- A</div>
+                <div class="summary-item">
+                    <div class="summary-data-label">ILC</div>
+                    <div class="summary-data-value ilc-average-value">-- A</div>
+                </div>
             </div>
 
             <div class="page-header">
