@@ -17,7 +17,27 @@ export function handleMqttMessage(message, dashboardInstance) {
         const data = payload ? JSON.parse(payload) : {};
         //console.log("parts:", parts, "data:", data);
 
-        // 1. Mensagens de conexão/descoberta
+        // 1. Mensagens de heartbeat
+        if (topic.includes('/status/heartbeat')) {
+            const deviceId = parts[1];
+            if (!deviceId) return false;
+
+            // Novo dispositivo
+            if (!dashboardInstance.devices[deviceId]) {
+                if (dashboardInstance.handleDeviceDiscovery) {
+                    dashboardInstance.handleDeviceDiscovery(deviceId);
+                }
+            }
+
+            // Processa heartbeat de conexão
+            const heartbeatStatus = data.status; // 'online' ou 'offline'
+            if (dashboardInstance.handleHeartbeat) {
+                dashboardInstance.handleHeartbeat(deviceId, heartbeatStatus);
+            }
+            return true;
+        }
+
+        // 2. Mensagens de conexão/descoberta (mantido para compatibilidade)
         if (topic.includes('/status/connection')) {
             
             const deviceId = data.deviceId || parts[1];

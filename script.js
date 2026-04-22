@@ -28,6 +28,10 @@ class EVSEDashboard {
         this.messageObserver = null;
         this.observedMessages = new Set();
 
+        // Sistema de heartbeat para detecção de offline
+        this.heartbeatTimers = {}; // Armazena timers por deviceId
+        this.heartbeatTimeout = 4000; // 4 segundos = 4 heartbeats perdidos (1 heartbeat/s)
+
         this.init();
 
         document.addEventListener('keydown', (event) => {
@@ -110,6 +114,41 @@ class EVSEDashboard {
             EVSE.ui.updateSummaryCardUI(this.devices, summaryCard, device.state, isOnline);
         }
         EVSE.ui.updateDetailPageUI(this, deviceId, 'connection_status_change', { online: isOnline });
+    }
+
+    /**
+     * Reseta o timer de heartbeat para um dispositivo
+     * Se o heartbeat for 'online', reseta o timeout
+     * Se o heartbeat for 'offline', marca como offline imediatamente
+     * @param {string} deviceId - ID do dispositivo
+     * @param {string} heartbeatStatus - Status recebido ('online' ou 'offline')
+     */
+    handleHeartbeat(deviceId, heartbeatStatus) {
+        // Limpa o timer anterior se existir
+        if (this.heartbeatTimers[deviceId]) {
+            clearTimeout(this.heartbeatTimers[deviceId]);
+        }
+
+        if (heartbeatStatus === 'online') {
+            // Se recebeu heartbeat online, reseta o timer
+            // Se não receber outro heartbeat em 4 segundos, marca como offline
+            this.heartbeatTimers[deviceId] = setTimeout(() => {
+                console.warn(`⏱️ Heartbeat timeout para ${deviceId} - marcando como offline`);
+                this.updateDeviceConnectionStatus(deviceId, false);
+                delete this.heartbeatTimers[deviceId];
+            }, this.heartbeatTimeout);
+        } else if (heartbeatStatus === 'offline') {
+            // Se o backend envia offline diretamente, marca como offline imediatamente
+            this.updateDeviceConnectionStatus(deviceId, false);
+        }
+    }
+
+    /**
+     * Limpa todos os timers de heartbeat quando o dashboard é destruído
+     */
+    clearHeartbeatTimers() {
+        Object.values(this.heartbeatTimers).forEach(timer => clearTimeout(timer));
+        this.heartbeatTimers = {};
     }
 
     navigateToDetailPage(deviceId) {
@@ -1444,6 +1483,7 @@ class EVSEDashboard {
         if (this.clockInterval) clearInterval(this.clockInterval);
         if (this.rtcSyncInterval) clearInterval(this.rtcSyncInterval);
         if (this.chart1) this.chart1.destroy();
+        this.clearHeartbeatTimers(); // Limpa timers de heartbeat
         if (this.mqttClient && this.mqttClient.isConnected()) {
             this.mqttClient.disconnect();
         }
