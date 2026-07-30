@@ -30,7 +30,7 @@ class EVSEDashboard {
 
         // Sistema de heartbeat para detecção de offline
         this.heartbeatTimers = {}; // Armazena timers por deviceId
-        this.heartbeatTimeout = 4000; // 4 segundos = 4 heartbeats perdidos (1 heartbeat/s)
+        this.heartbeatTimeout = 30000; // x segundos = x heartbeats perdidos 
 
         this.init();
 
@@ -130,8 +130,9 @@ class EVSEDashboard {
         }
 
         if (heartbeatStatus === 'online') {
+            this.updateDeviceConnectionStatus(deviceId, true);
             // Se recebeu heartbeat online, reseta o timer
-            // Se não receber outro heartbeat em 4 segundos, marca como offline
+            // Se não receber outro heartbeat em segundos, marca como offline
             this.heartbeatTimers[deviceId] = setTimeout(() => {
                 console.warn(`⏱️ Heartbeat timeout para ${deviceId} - marcando como offline`);
                 this.updateDeviceConnectionStatus(deviceId, false);
