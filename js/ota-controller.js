@@ -78,6 +78,12 @@ export class OtaController {
             device.lastSeen = this.now();
             device.version = validVersion(data.running_version) ? data.running_version : null;
             device.boot = data.boot_validation;
+            device.profile = data.ota_profile ?? 'normal';
+            device.developmentMode = device.profile === 'development' &&
+                data.app_project === 'EVSE' && data.ota_hardware_checks === false;
+            device.profileValid = device.developmentMode || (device.profile === 'normal' &&
+                (data.ota_hardware_checks === undefined || data.ota_hardware_checks === true) &&
+                (data.app_project === undefined || data.app_project === 'EVSE'));
         } else if (type === 'connection' && data.status === 'offline') {
             device.online = false;
         } else if (type === 'state' && !retained) {
@@ -98,7 +104,8 @@ export class OtaController {
         if (!device?.online || this.now() - device.lastSeen >= OTA.freshnessMs) return 'EVSE offline ou sem heartbeat recente.';
         if (!device.version) return 'Aguardando uma versão válida no heartbeat do EVSE.';
         if (device.boot !== 'passed') return 'Diagnóstico local do EVSE ainda não aprovado.';
-        if (device.state !== 0) return 'OTA disponível somente no Estado A, com veículo desconectado.';
+        if (!device.profileValid) return 'Perfil OTA desconhecido ou configuração de desenvolvimento inconsistente.';
+        if (!device.developmentMode && device.state !== 0) return 'OTA disponível somente no Estado A, com veículo desconectado.';
         if (this.submitting.has(id) || state.attempts.some(unresolved)) return 'Existe uma tentativa em andamento ou com resultado desconhecido.';
         return '';
     }
@@ -186,6 +193,7 @@ export class OtaController {
         const waiting = attempt && unresolved(attempt) && (!this.connected || !device?.online ||
             this.now() - device.lastSeen >= OTA.freshnessMs || this.now() - attempt.updatedAt >= OTA.responseMs);
         return { attempt, busy, retained: state.attempts.find(a => a.id === state.retainedId) || null,
-            version: device?.version || null, reason: this.reason(id, state), waiting };
+            version: device?.version || null, developmentMode: device?.developmentMode === true,
+            reason: this.reason(id, state), waiting };
     }
 }

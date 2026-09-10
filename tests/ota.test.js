@@ -61,6 +61,45 @@ test('one selected device gets exactly the four fields at QoS 1, never retained'
         command: 'ota_update', version: '1.1.0', url: URL('1.1.0'), request_id: id }, qos: 1, retained: false });
     assert.equal(c.snapshot(A).attempt, null);
 });
+test('development profile uses the same OTA command outside State A', async () => {
+    const { c, sent } = setup();
+    c.telemetry(A, 'state', { state: 4 });
+    const heartbeat = { status: 'online', running_version: '1.0.0', boot_validation: 'passed',
+        ota_profile: 'development', app_project: 'EVSE', ota_hardware_checks: false };
+    c.telemetry(A, 'heartbeat', heartbeat);
+    assert.equal(c.snapshot(A).developmentMode, true);
+    assert.equal(c.snapshot(A).reason, '');
+    await c.start(A, '1.1.0', URL('1.1.0'));
+    assert.equal(sent.length, 1);
+    assert.deepEqual(Object.keys(sent[0].payload).sort(), ['command', 'request_id', 'url', 'version']);
+});
+
+test('inconsistent profiles and failed development boot cannot bypass admission', () => {
+    const { c } = setup();
+    const good = { status: 'online', running_version: '1.0.0', boot_validation: 'passed',
+        ota_profile: 'development', app_project: 'EVSE', ota_hardware_checks: false };
+    for (const changes of [{ ota_hardware_checks: true }, { ota_hardware_checks: 'false' },
+        { app_project: 'OTHER' }, { ota_profile: 'unknown' }, { ota_profile: 'normal' },
+        { boot_validation: 'recovery_required' }]) {
+        c.telemetry(A, 'heartbeat', { ...good, ...changes });
+        assert(c.snapshot(A).reason);
+    }
+    c.telemetry(A, 'heartbeat', good);
+    c.setConnected(false); c.setConnected(true); c.setStatusReady(true);
+    c.telemetry(A, 'heartbeat', good, true);
+    assert(c.snapshot(A).reason);
+    assert.equal(c.snapshot(A).developmentMode, false);
+});
+
+test('returning to a normal heartbeat restores State A admission', () => {
+    const { c, ready } = setup();
+    c.telemetry(A, 'heartbeat', { status: 'online', running_version: '1.0.0', boot_validation: 'passed',
+        ota_profile: 'development', app_project: 'EVSE', ota_hardware_checks: false });
+    ready(); c.telemetry(A, 'state', { state: 4 });
+    assert.equal(c.snapshot(A).developmentMode, false);
+    assert.match(c.snapshot(A).reason, /Estado A/);
+});
+
 test('double submit produces one publication', async () => {
     const { c, sent } = setup();
     const results = await Promise.allSettled([c.start(A, '1.1.0', URL('1.1.0')), c.start(A, '1.1.0', URL('1.1.0'))]);

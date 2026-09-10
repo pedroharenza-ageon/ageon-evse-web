@@ -44,6 +44,22 @@ async function emitStatus(page, requestId, changes = {}, id = A, retained = fals
     }, retained), { id, requestId, changes, retained });
 }
 
+test('development hardware-check setting is visible and permits an update in State E', async ({ page }) => {
+    await open(page); await ready(page, A, 4);
+    const panel = await details(page);
+    await expect(panel.locator('.ota-start')).toBeDisabled();
+    await page.evaluate(id => window.__emit(id, 'heartbeat', { status: 'online', running_version: '1.0.0',
+        boot_validation: 'passed', ota_profile: 'development', app_project: 'EVSE', ota_hardware_checks: false }), A);
+    await expect(panel.locator('.ota-profile')).toContainText('verificações de hardware da OTA dispensadas');
+    await expect(panel.locator('.ota-start')).toBeEnabled();
+    await fill(panel); await panel.locator('.ota-start').click();
+    await expect.poll(async () => (await commands(page)).length).toBe(1);
+    const [command] = await commands(page);
+    await emitStatus(page, command.payload.request_id, { status: 'success', running_version: '1.1.0' });
+    await expect(panel.locator('.ota-status')).toContainText('concluída');
+    await expect(panel.locator('.ota-profile')).toContainText('com ou sem a placa de potência');
+});
+
 test('details send once; full progress still awaits validation; errors cannot replace the operation', async ({ page }, info) => {
     const errors = []; page.on('pageerror', error => errors.push(error.message));
     await open(page); await ready(page); const panel = await details(page);

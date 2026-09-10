@@ -1,5 +1,5 @@
 // Incrementar VERSION quando qualquer recurso local do painel mudar.
-const VERSION = '1.6.7';
+const VERSION = '1.6.8';
 const SCOPE = new URL(self.registration.scope);
 const PREFIX = 'ageon-evse-web:' + SCOPE.pathname + ':shell:';
 const CACHE = PREFIX + VERSION;

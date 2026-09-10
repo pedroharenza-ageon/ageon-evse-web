@@ -4,7 +4,7 @@ import { firmwareFixture } from '../firmware-fixture.js';
 
 const A = 'AABBCCDDEE01';
 const base = 'http://127.0.0.1:4173/ageon-evse-web/';
-const cacheName = 'ageon-evse-web:/ageon-evse-web/:shell:1.6.7';
+const cacheName = 'ageon-evse-web:/ageon-evse-web/:shell:1.6.8';
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 async function deployment(request, mode) {
     expect((await request.post(base + '__test__/deployment?mode=' + mode)).status()).toBe(204);
@@ -42,7 +42,7 @@ test('real worker installs the relocated asset graph and uses the project manife
     const evidence = await page.evaluate(async () => {
         const registration = await navigator.serviceWorker.getRegistration();
         const keys = await caches.keys();
-        const cache = await caches.open(keys.find(key => key.endsWith(':shell:1.6.7')));
+        const cache = await caches.open(keys.find(key => key.endsWith(':shell:1.6.8')));
         const files = (await cache.keys()).map(request => new URL(request.url).pathname);
         return { scope: registration.scope, script: registration.active.scriptURL, files, manifest: await (await fetch('manifest.json')).json() };
     });
@@ -113,7 +113,7 @@ test('upgrade from the legacy worker preserves request IDs and other projects ca
     await expect.poll(() => page.evaluate(async base => (await (await caches.open('dashboard-v1.6.6')).keys()).some(r => r.url.startsWith(base)), base)).toBe(false);
     const sent = await page.evaluate(() => window.__mqtt.sent.filter(m => m.payload.command === 'ota_update').length); expect(sent).toBe(1);
     await page.reload(); await ready(page);
-    await expect(page.getByText('Versão 1.6.7', { exact: true })).toBeVisible();
+    await expect(page.getByText('Versão 1.6.8', { exact: true })).toBeVisible();
     expect(await page.evaluate(id => window.dashboard.ota.controller.snapshot(id).attempt.id, A)).toBe(id);
     expect(await page.evaluate(async () => (await (await caches.open('dashboard-v1.6.6')).keys()).length)).toBe(1);
     expect(await page.evaluate(async () => (await caches.keys()).includes('unrelated-cache'))).toBe(true);
@@ -142,5 +142,5 @@ test('failed asset installation keeps the previous worker active until the compl
     await deployment(request, 'current');
     await page.evaluate(async () => (await navigator.serviceWorker.getRegistration()).update());
     await expect.poll(() => page.evaluate(() => navigator.serviceWorker.controller !== window.previousWorker)).toBe(true);
-    await page.reload(); await expect(page.getByText('Versão 1.6.7', { exact: true })).toBeVisible();
+    await page.reload(); await expect(page.getByText('Versão 1.6.8', { exact: true })).toBeVisible();
 });

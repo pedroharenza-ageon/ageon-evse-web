@@ -27,6 +27,14 @@ test('HTML, LFS, bootloader, merged/truncated/oversized and corrupt images are r
         assert.throws(() => inspectFirmware(bad, '1.1.0'));
     }
 });
+
+test('all builds use EVSE identity and the same publication verifier', async () => {
+    const obsolete = firmwareFixture('1.1.0', 1, 'EVSE-CTRL-DEV');
+    assert.throws(() => inspectFirmware(obsolete, '1.1.0'), /descritor/);
+    const report = await verifyPublished(image, '1.1.0', url, async () => new Response(image));
+    assert.equal(report.project, 'EVSE');
+    assert.equal(report.verification, 'published');
+});
 test('published verification requires HTTPS allowlist, HTTP 200 and exact bytes/hash', async () => {
     const calls = [];
     const fetchImpl = async (target, options) => { calls.push({ target, options }); return new Response(image, { headers: { 'Content-Type': 'application/octet-stream', 'Content-Length': String(image.length) } }); };
@@ -90,5 +98,5 @@ test('HTML and manifest assets resolve within the project Pages prefix after rel
     for (const key of ['id', 'scope', 'start_url']) assert(new URL(manifest[key], base).href.startsWith(base.href));
     for (const item of [...manifest.icons, ...manifest.screenshots]) await access(item.src);
     const sw = await readFile('sw.js', 'utf8');
-    assert(sw.includes("const VERSION = '1.6.7'")); assert(html.includes('Versão 1.6.7'));
+    assert(sw.includes("const VERSION = '1.6.8'")); assert(html.includes('Versão 1.6.8'));
 });

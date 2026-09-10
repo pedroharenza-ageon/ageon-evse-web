@@ -33,7 +33,7 @@ http.createServer(async (req, res) => {
             if (relative === 'firmware/redirect.bin') { res.writeHead(302, { Location: base + 'firmware/evse-1.1.0.bin' }); res.end(); return; }
             if (relative === 'index.html') {
                 let html = await readFile(path.join(root, 'index.html'), 'utf8');
-                if (deployment === 'legacy') html = html.replaceAll('src="js/', 'src="').replaceAll('href="css/', 'href="').replaceAll('Versão 1.6.7', 'Versão 1.6.6');
+                if (deployment === 'legacy') html = html.replaceAll('src="js/', 'src="').replaceAll('href="css/', 'href="').replaceAll('Versão 1.6.8', 'Versão 1.6.6');
                 html = html.replace('https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js', base + '__test__/paho.js')
                     .replace('https://cdn.jsdelivr.net/npm/chart.js', base + '__test__/chart.js')
                     .replace('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css', base + '__test__/icons.css');

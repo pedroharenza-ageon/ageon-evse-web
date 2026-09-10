@@ -22,6 +22,8 @@ export function mountOtaPanel(panel, id, controller) {
         const view = controller.snapshot(id);
         const a = view.attempt, status = a?.status;
         panel.querySelector('.ota-version').textContent = view.version || 'Aguardando heartbeat';
+        panel.querySelector('.ota-profile').textContent = view.developmentMode ?
+            'Desenvolvimento: verificações de hardware da OTA dispensadas. Funciona com ou sem a placa de potência; a carga fica bloqueada durante a atualização.' : '';
         panel.querySelector('.ota-reason').textContent = view.reason || 'Pronto para solicitar uma versão superior.';
         button.disabled = sending || Boolean(view.reason);
         version.disabled = url.disabled = sending || view.busy.length > 0;

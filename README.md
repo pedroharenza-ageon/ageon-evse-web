@@ -21,7 +21,7 @@ Para iniciar OTA, o navegador precisa de contexto seguro (HTTPS ou localhost), `
 
 1. Publicar e verificar previamente o binário versionado no Pages, conforme o [roteiro de distribuição](firmware/README.md). O exemplo `1.1.0` não comprova que esse arquivo esteja disponível.
 2. Abrir os detalhes do EVSE correto. A versão atual vem do heartbeat, não do valor digitado pelo operador.
-3. Aguardar MQTT conectado, confirmação da assinatura OTA, heartbeat recente, `boot_validation=passed` e Estado A informado na conexão atual. Descoberta retida com `online` não basta para habilitar o botão.
+3. Aguardar MQTT conectado, confirmação da assinatura OTA, heartbeat recente, `boot_validation=passed` e Estado A informado na conexão atual. A configuração explícita `ota_profile=development` dispensa Estado A somente quando o heartbeat também informa projeto `EVSE` e `ota_hardware_checks=false`; a página mostra essa condição. Descoberta retida com `online` não basta para habilitar o botão.
 4. Informar uma versão estritamente superior, no formato `MAJOR.MINOR.PATCH`, e a URL completa, por exemplo:
 
    `https://pedroharenza-ageon.github.io/ageon-evse-web/firmware/evse-1.1.0.bin`
@@ -31,7 +31,7 @@ Para iniciar OTA, o navegador precisa de contexto seguro (HTTPS ou localhost), `
 
 Versões estáveis têm até 31 caracteres, sem prefixo `v`, sufixos ou zeros iniciais. A comparação usa componentes decimais sem perda de precisão. A URL deve corresponder literalmente ao host e caminho acima; `:443` explícito também é aceito. Credenciais, query, fragmento, travessia, codificação de caminho, outro repositório ou nome de arquivo divergente são recusados antes da publicação.
 
-O ESP32 continua responsável por State A, relés abertos, validação da versão/imagem, prazos, ativação e rollback. O perfil NTC do firmware atual ainda não foi confirmado; esse firmware reporta diagnóstico não aprovado e mantém a admissão OTA bloqueada. Os ensaios integrados dependem do provisionamento e da bancada.
+O ESP32 continua responsável pela política de admissão, relés abertos, validação da versão/imagem, prazos, ativação e rollback. O build normal exige State A e o perfil NTC confirmado, ainda pendente. O build de desenvolvimento permite testar OTA com ou sem potência, mantendo CP real e lógica normal de carga; o relé permanece aberto durante a atualização e a validação de boot. O diagnóstico desse perfil dispensa CP/GFCI/NTCs e não comprova saúde da potência ausente. A página não altera esse modo: ele é escolhido ao compilar o firmware. Ambas as configurações usam projeto EVSE e podem ser instaladas por OTA com versão superior; a nova imagem executa seus próprios checks de boot.
 
 ## Contrato MQTT e reconciliação
 
@@ -83,7 +83,7 @@ npm run check
 npm run test:browser
 ```
 
-Em 10/09/2026: **50 testes Node aprovados** (32 de OTA e 18 de distribuição), sintaxe dos arquivos JavaScript e `manifest.json` válidos. A publicação acrescentou uma regressão de negociação HTTP sem compressão. Permanecem as evidências anteriores de **17 testes de navegador aprovados** no Edge headless (12 de dashboard desktop/mobile e 5 de distribuição com service worker real); não houve mudança no código do navegador nesta publicação. Cobrem envio único, versão/URL, QoS/retenção, dois dispositivos, duas abas com Web Locks reais, persistência/reload, reconexão, silêncio, rejeições, progresso atrasado, rollback, limpeza e falhas de armazenamento. Incluem teclado, largura de 320 px, instalação/migração de cache, falha parcial de deploy, modo offline e resposta de firmware independente de caches antigos.
+Em 10/09/2026: **54 testes Node aprovados** (35 de OTA e 19 de distribuição), sintaxe dos arquivos JavaScript e `manifest.json` válidos, e **19 testes de navegador aprovados** no Edge headless (14 de dashboard desktop/mobile e 5 de distribuição com service worker real). Incluem o aviso de desenvolvimento, admissão fora de A somente com perfil consistente, retorno à política normal e recusa de imagens com perfil incompatível. Também cobrem envio único, versão/URL, QoS/retenção, dois dispositivos, duas abas com Web Locks reais, persistência/reload, reconexão, silêncio, rejeições, progresso atrasado, rollback, limpeza e falhas de armazenamento. Incluem teclado, largura de 320 px, instalação/migração de cache, falha parcial de deploy, modo offline e resposta de firmware independente de caches antigos.
 
 Playwright é uma dependência apenas de desenvolvimento, fixada em `package-lock.json`. O navegador padrão é Edge instalado; para usar Chromium do Playwright, instalar com `npx playwright install chromium` e definir `OTA_TEST_BROWSER=chromium` no ambiente. Os relatórios e capturas ficam em `test-results/`, ignorado pelo Git.
 
@@ -107,7 +107,7 @@ tests/               validação local
 
 O manifesto usa `id` e `scope` relativos (`./`) e `start_url=./?mode=pwa`. Imports JS permanecem relativos entre módulos; HTML referencia `css/` e `js/`. O worker permanece na raiz para controlar `/ageon-evse-web/`; `.nojekyll` permite servir os arquivos estáticos sem processamento Jekyll. A fonte de publicação do Pages deve ser conferida em Settings → Pages antes do deploy; não foi alterada por esta implementação.
 
-- A versão visível e o cache são **1.6.7**. Ao mudar um recurso local, incrementar `VERSION` em `sw.js` e sincronizar a versão exibida. O cache instala o conjunto completo de HTML, CSS, JS, manifesto e imagens antes de ativar; uma falha de recurso não substitui o worker anterior. A duração das operações de instalação/ativação é vinculada a `waitUntil`, conforme a [API de service workers](https://developer.mozilla.org/en-US/docs/Web/API/ExtendableEvent/waitUntil).
+- A versão visível e o cache são **1.6.8**. Ao mudar um recurso local, incrementar `VERSION` em `sw.js` e sincronizar a versão exibida. O cache instala o conjunto completo de HTML, CSS, JS, manifesto e imagens antes de ativar; uma falha de recurso não substitui o worker anterior. A duração das operações de instalação/ativação é vinculada a `waitUntil`, conforme a [API de service workers](https://developer.mozilla.org/en-US/docs/Web/API/ExtendableEvent/waitUntil).
 - O namespace inclui o prefixo do projeto. Limpeza remove somente caches desse namespace; em caches legados `dashboard-v*`, remove somente entradas dentro deste projeto, preservando outros projetos na mesma origem. Nunca consulta globalmente todos os caches para responder uma requisição.
 - `firmware/` sempre usa rede, `cache: no-store` e redirects recusados. Não é incluído no precache, não usa cache HTTP nem CacheStorage e nunca recebe HTML do dashboard como fallback. Sem rede, retorna 503 textual; arquivo ausente mantém 404 da rede, que pode ter uma página de erro própria do servidor.
 - Para a navegação da raiz/`index.html`, uma consulta à rede com prazo de 15 s confirma disponibilidade; o HTML vem do mesmo conjunto de recursos instalado. Sem rede, mostra `offline.html`, sem controles MQTT. As dependências externas continuam exigindo rede; não se promete operação completa offline. Outros caminhos não recebem fallback de dashboard.
@@ -123,6 +123,8 @@ npm run firmware:verify -- --file './firmware/evse-1.1.0.bin' --version 1.1.0 --
 Esses comandos são somente leitura: não copiam, publicam ou instalam firmware. O modo remoto mantém validação TLS e compara tamanho/SHA-256 sem passar pelo service worker. O [roteiro em `firmware/README.md`](firmware/README.md) define nomes imutáveis, registro de lançamento e validação após deploy. O primeiro artefato incluído é `evse-1.0.0.bin`; `1.1.0` continua sendo apenas um exemplo. O perfil físico e o ensaio integrado da etapa 11 permanecem pendentes.
 
 ## Organização desta entrega
+
+A preparação acrescenta identificação `ota_profile=development` no painel. Normal e desenvolvimento usam a mesma identidade `EVSE`, o mesmo comando MQTT e o mesmo verificador `firmware:verify`, sem argumento de perfil. A configuração compilada altera os checks físicos da OTA/boot; o desenvolvimento funciona com ou sem a potência e mantém a lógica de carga, bloqueada durante a atualização. A configuração da imagem instalada governa seu próximo boot; transições por OTA respeitam versão superior. A interface 1.6.8 precisa estar implantada no Pages para usar essa indicação. Esta revisão não inclui gravação da placa nem publicação de outro binário.
 
 - `js/ota-protocol.js`: validação do contrato e evolução de estados, sem DOM ou transporte.
 - `js/ota-controller.js`: admissão no cliente, correlação, persistência e coordenação entre abas.

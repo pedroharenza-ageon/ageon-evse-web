@@ -6,6 +6,8 @@ O primeiro artefato é [`evse-1.0.0.bin`](evse-1.0.0.bin), destinado à verifica
 
 ## Preparar um lançamento
 
+Normal e desenvolvimento usam o mesmo descritor `EVSE` e as mesmas verificações locais/remotas abaixo, sem argumento de perfil. Registrar a configuração de checks em cada lançamento; a imagem instalada define os requisitos do próximo boot. É possível trocar de configuração por OTA com versão superior, sem exigir USB após o provisionamento inicial. Como ambos usam `evse-X.Y.Z.bin`, reservar versões distintas para quaisquer artefatos publicados com bytes diferentes. A configuração de desenvolvimento preserva a lógica normal de carga; o bloqueio do relé durante OTA é temporário.
+
 1. No projeto ESP32, definir uma versão estável superior à versão-base, compilar e executar suas validações. A base e a imagem de rollback devem incluir as etapas 4–8. Confirmar o perfil físico/NTCs e as condições da bancada antes do ensaio integrado.
 2. Separar `.pio/build/esp32dev/evse-X.Y.Z.bin`. Não usar `bootloader.bin`, tabela de partições, arquivo mesclado para instalação serial, `.elf`, ZIP ou ponteiro Git LFS.
 3. No projeto web, verificar o arquivo local (PowerShell; substituir a versão pelos dados reais):
