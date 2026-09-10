@@ -12,6 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="ota.css">
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -30,11 +31,8 @@
 <body>
     <div class="app-shell">
         <main class="main-content" data-scrollable>
-            <div id="page-container">
-                <div id="page-home" class="app-page active">
-                </div>
-            </div>
-            <p style="font-size: 12px;">Versão 1.6.5</p>
+            <div id="page-container"></div>
+            <p style="font-size: 12px;">Versão 1.6.6</p>
         </main>
 
         <nav class="bottom-nav">
@@ -506,6 +504,28 @@
                     <div class="summary-data-value cp-peaktopeak-value">-- mV</div>
                 </div>
             </div>
+
+            <section class="ota-panel status-card" aria-label="Atualização de firmware OTA">
+                <h2>Atualização de firmware</h2>
+                <p>Controle manual para a POC. Versão atual: <strong class="ota-version">Aguardando heartbeat</strong></p>
+                <form class="ota-form">
+                    <label>Nova versão
+                        <input name="version" type="text" required maxlength="31" placeholder="1.1.0" autocomplete="off" spellcheck="false">
+                    </label>
+                    <label>URL HTTPS do firmware
+                        <input name="url" type="url" required maxlength="128" placeholder="https://pedroharenza-ageon.github.io/ageon-evse-web/firmware/evse-1.1.0.bin" autocomplete="off" spellcheck="false">
+                    </label>
+                    <button class="ota-start detail-action-btn" type="submit" disabled>Iniciar atualização</button>
+                    <p class="ota-reason"></p>
+                    <p class="ota-feedback" role="alert"></p>
+                </form>
+                <p class="ota-request"></p>
+                <p class="ota-status" role="status" aria-live="polite">Nenhuma atualização iniciada.</p>
+                <progress max="100" aria-label="Transferência do firmware" hidden></progress>
+                <p class="ota-bytes"></p>
+                <p class="ota-other"></p>
+                <p class="ota-note">100% transferido ou reinício não confirma sucesso. Aguarde a validação informada pelo EVSE.</p>
+            </section>
 
             <div class="detail-actions">
                 <button class="detail-action-btn block-btn"><i class="fas fa-lock"></i> Bloquear Carregador</button>

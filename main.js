@@ -5,6 +5,7 @@
 // ============================================================
 
 // Constantes
+import { createOtaDashboard } from './ota-panel.js';
 import { 
     CONFIG, 
     MQTT_CONFIG, 
@@ -63,6 +64,7 @@ import {
 
 // Constantes
 window.EVSE_CONFIG = CONFIG;
+window.EVSE_createOtaDashboard = createOtaDashboard;
 window.EVSE_MQTT_CONFIG = MQTT_CONFIG;
 window.EVSE_ESTADOS = ESTADOS;
 window.EVSE_ESTADOS_NOMES = ESTADOS_NOMES;

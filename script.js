@@ -12,7 +12,7 @@ class EVSEDashboard {
     constructor() {
         this.homeChart = null;
         this.homeChartInterval = null;
-        this.devices = {}; 
+        this.devices = Object.create(null);
         this.mqttClient = null;
         this.activeModalDeviceId = null;
         this.elementToFocusOnModalClose = null;
@@ -32,6 +32,7 @@ class EVSEDashboard {
         this.heartbeatTimers = {}; // Armazena timers por deviceId
         this.heartbeatTimeout = 30000; // x segundos = x heartbeats perdidos 
 
+        this.ota = window.EVSE_createOtaDashboard(this);
         this.init();
 
         document.addEventListener('keydown', (event) => {
@@ -85,7 +86,7 @@ class EVSEDashboard {
         };
 
         const statusTopic = MQTT_CONFIG.topics.statusTemplate.replace('{deviceId}', deviceId);
-        this.mqttClient.subscribe(statusTopic);
+        this.mqttClient.subscribe(statusTopic, { qos: 1 });
         //console.log(`Inscrito em TODOS os tópicos de status para ${deviceId} via: ${statusTopic}`);
 
         //console.log(`Solicitando dados iniciais para ${deviceId}...`);
@@ -182,6 +183,7 @@ class EVSEDashboard {
             
             EVSE.ui.addDetailEventListeners(this, detailPage, deviceId);
             container.appendChild(clone); 
+            this.ota.mount(detailPage, deviceId);
 
             EVSE.ui.setupDetailChart(this, detailPage, deviceId); 
         }
@@ -1418,6 +1420,7 @@ class EVSEDashboard {
     }
 
     updateConnectionStatus(connected, statusText) {
+        this.ota.controller.setConnected(connected);
         const statusElement = document.getElementById('connection-status');
         if (statusElement) {
             const icon = statusElement.querySelector('.fas');
@@ -1480,6 +1483,8 @@ class EVSEDashboard {
 
     // Cleanup
     destroy() {
+        this.ota.destroy();
+        this.stopMqtt?.();
         console.log("dstroy chamado");
         if (this.clockInterval) clearInterval(this.clockInterval);
         if (this.rtcSyncInterval) clearInterval(this.rtcSyncInterval);

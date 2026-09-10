@@ -1,4 +1,5 @@
 // mqtt-message-handler.js - PROCESSAMENTO DE MENSAGENS MQTT
+import { validDeviceId } from './ota-protocol.js';
 
 /**
  * Processa uma mensagem MQTT recebida
@@ -14,7 +15,14 @@ export function handleMqttMessage(message, dashboardInstance) {
     
     try {
         const parts = topic.split('/');
+        if (parts.length !== 4 || parts[0] !== 'evse' || parts[2] !== 'status' || !validDeviceId(parts[1])) return false;
+        if (parts[3] === 'ota') {
+            // OTA tem validação/correlação próprias, inclusive limpeza de payload vazio.
+            return dashboardInstance.ota.controller.receive(parts[1], payload, message.retained === true);
+        }
         const data = payload ? JSON.parse(payload) : {};
+        if (!data || typeof data !== 'object' || Array.isArray(data)) return false;
+        dashboardInstance.ota?.controller.telemetry(parts[1], parts[3], data, message.retained === true);
         //console.log("parts:", parts, "data:", data);
 
         // 1. Mensagens de heartbeat
@@ -40,7 +48,7 @@ export function handleMqttMessage(message, dashboardInstance) {
         // 2. Mensagens de conexão/descoberta (mantido para compatibilidade)
         if (topic.includes('/status/connection')) {
             
-            const deviceId = data.deviceId || parts[1];
+            const deviceId = parts[1];
             if (!deviceId) return false;
             
             // Novo dispositivo
@@ -90,6 +98,7 @@ export function handleMqttMessage(message, dashboardInstance) {
         }
 
         // 5. Atualiza dados do dispositivo
+        if (['__proto__', 'constructor', 'prototype'].includes(statusName)) return false;
         dashboardInstance.devices[deviceId][statusName] = data;
 
         // 6. Notifica atualizações específicas
@@ -111,7 +120,7 @@ function notifyStatusUpdate(deviceId, statusName, data, dashboardInstance) {
     const summaryCard = document.querySelector(`#page-home .device-card-summary[data-device-id="${deviceId}"]`);
     if (summaryCard && EVSE.ui.updateSummaryCardUI) {
         EVSE.ui.updateSummaryCardUI(
-            dashboardInstance,
+            dashboardInstance.devices,
             summaryCard, 
             dashboardInstance.devices[deviceId].state, 
             dashboardInstance.devices[deviceId].online

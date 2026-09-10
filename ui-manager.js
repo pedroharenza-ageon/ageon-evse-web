@@ -1,6 +1,6 @@
 // ui-navigation.js 
 
-import { ESTADOS_NOMES } from './config.js';
+import { ESTADOS_NOMES, CURRENT_STATES } from './config.js';
 
 export const pageRegistry = {
     lastPage: null,
