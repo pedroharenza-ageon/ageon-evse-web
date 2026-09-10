@@ -35,7 +35,11 @@ Esta imagem mantém o perfil de desenvolvimento da base 1.0.3: dispensa requisit
 
 URL: [download de evse-1.0.4.bin](https://pedroharenza-ageon.github.io/ageon-evse-web/firmware/evse-1.0.4.bin).
 
-Verificação remota pendente do deploy. Comando para conferir os bytes publicados:
+**Aprovada em 10/09/2026 às 20:49:28.529 UTC.** Publicação na `main` em `14c6a2f08280483ea7b8b9389abd93237913d5d6`; [deploy do Pages concluído com sucesso](https://github.com/pedroharenza-ageon/ageon-evse-web/actions/runs/34528423710). GET HTTPS retornou HTTP 200, sem redirects/compressão, com TLS validado, tamanho de 1.132.272 bytes e SHA-256 `265866f9343a3ede7943750512c762aab5cc23a95d7ce0432c6476ed67f12d99` idênticos ao arquivo local; resultado `verification=published`.
+
+Às 20:49:28.934 UTC, a versão anterior 1.0.2 também manteve HTTP 200, 1.132.208 bytes e hash original `9d457e0359a14dc18376b14513b1bf6268cc21daf940acd950d8f64c6869c7ed`. Essa verificação confirma preservação do histórico, não corrige seu downloader antigo.
+
+Comando para repetir a conferência dos bytes publicados:
 
 ```powershell
 node tools/verify-firmware.mjs --file firmware/evse-1.0.4.bin --version 1.0.4 --url https://pedroharenza-ageon.github.io/ageon-evse-web/firmware/evse-1.0.4.bin
