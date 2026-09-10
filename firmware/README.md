@@ -27,7 +27,7 @@ Após o deploy, manter a cópia local original e executar:
 npm run firmware:verify -- --file './firmware/evse-1.1.0.bin' --version 1.1.0 --url 'https://pedroharenza-ageon.github.io/ageon-evse-web/firmware/evse-1.1.0.bin'
 ```
 
-O comando faz GET HTTPS com validação TLS padrão do Node, sem redirects, cache ou desativação de certificados. Aceita somente HTTP 200, rejeita resposta textual/comprimida e exige tamanho e SHA-256 idênticos ao arquivo local. O corpo é processado incrementalmente, limitado ao tamanho esperado; há timeout de 30 segundos. `verification: published` identifica a verificação remota bem-sucedida. Guardar o relatório no registro do lançamento, incluindo data e URL final.
+O comando faz GET HTTPS com validação TLS padrão do Node, sem redirects, cache ou desativação de certificados. Solicita `Accept-Encoding: identity` para receber os bytes sem compressão; a negociação padrão do `fetch` pode fazer o Pages comprimir até um arquivo `.bin`. Aceita somente HTTP 200, rejeita resposta textual/comprimida e exige tamanho e SHA-256 idênticos ao arquivo local. O corpo é processado incrementalmente, limitado ao tamanho esperado; há timeout de 30 segundos. `verification: published` identifica a verificação remota bem-sucedida. Guardar o relatório no registro do lançamento, incluindo data e URL final.
 
 Não usar links `github.com/.../blob/...`, `raw.githubusercontent.com`, URLs com query, fragmento, credenciais ou nomes divergentes. A URL permitida pelo firmware é a do projeto Pages acima (porta explícita 443 também é aceita). O verificador é independente do navegador e do service worker; não envia comandos MQTT.
 

@@ -38,6 +38,13 @@ test('published verification requires HTTPS allowlist, HTTP 200 and exact bytes/
     await assert.rejects(verifyPublished(image, '1.1.0', 'https://github.com/user/repo/blob/main/file.bin', fetchImpl), /canônica/);
     assert.equal(calls.length, 1);
 });
+test('published verification negotiates uncompressed bytes with the firmware host', async () => {
+    const fetchImpl = async (_target, options) => {
+        const encoding = new Headers(options.headers).get('accept-encoding') === 'identity' ? 'identity' : 'gzip';
+        return new Response(image, { headers: { 'Content-Encoding': encoding } });
+    };
+    assert.equal((await verifyPublished(image, '1.1.0', url, fetchImpl)).verification, 'published');
+});
 for (const [name, response] of [
     ['404', () => new Response('not found', { status: 404 })],
     ['redirect', () => new Response('', { status: 302, headers: { location: url } })],

@@ -32,7 +32,24 @@ Publicação solicitada por Pedro Harenza em 10/09/2026 para verificar a distrib
 
 URL final: [download de evse-1.0.0.bin](https://pedroharenza-ageon.github.io/ageon-evse-web/firmware/evse-1.0.0.bin).
 
-Pendente de deploy e comparação com a cópia local. Após a publicação:
+**Aprovada em 10/09/2026 às 17:06:36.703 UTC (14:06:36.703 em Brasília).** O commit web `e3a0160f8d4fde0bf84feecef159a3e3f4b9e48f` foi publicado na `main`; o [deploy do Pages](https://github.com/pedroharenza-ageon/ageon-evse-web/actions/runs/34505891961) terminou com sucesso. O GET na URL final retornou HTTP 200, sem redirects ou compressão, com TLS validado, 1.131.648 bytes e SHA-256 idêntico ao arquivo local.
+
+```json
+{
+  "file": "evse-1.0.0.bin",
+  "version": "1.0.0",
+  "project": "EVSE",
+  "size_bytes": 1131648,
+  "sha256": "f60a67a64c2c6433c960f536f5ffbefe542472f0e30569ae962c27d1d82b189a",
+  "url": "https://pedroharenza-ageon.github.io/ageon-evse-web/firmware/evse-1.0.0.bin",
+  "verification": "published",
+  "verified_at": "2026-09-10T17:06:36.703Z"
+}
+```
+
+A negociação padrão do Node recebeu uma resposta comprimida e foi corretamente recusada. O verificador passou a solicitar `Accept-Encoding: identity`; a recusa de conteúdo comprimido permanece ativa e a suíte Node passou com 50 testes, incluindo regressão dessa negociação. O caminho não publicado `/firmware/evse-0.0.0.bin` retornou HTTP 404. Não existe versão anterior publicada para comparar; preservar este arquivo e repetir a comparação quando houver outro lançamento. O usuário confirmou que o dashboard implantado carrega corretamente; isso não comprova um teste específico de migração de cache antigo no site público.
+
+Para repetir a verificação:
 
 ```powershell
 npm run firmware:verify -- --file './firmware/evse-1.0.0.bin' --version 1.0.0 --url 'https://pedroharenza-ageon.github.io/ageon-evse-web/firmware/evse-1.0.0.bin'

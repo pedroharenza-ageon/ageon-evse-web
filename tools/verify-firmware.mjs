@@ -25,8 +25,8 @@ export async function verifyPublished(local, version, url, fetchImpl = fetch) {
     if (process.env.NODE_TLS_REJECT_UNAUTHORIZED === '0') throw new Error('Verificação TLS desativada no ambiente; remova NODE_TLS_REJECT_UNAUTHORIZED=0.');
     const expected = inspectFirmware(local, version);
     if (!validUrl(url, version)) throw new Error('Use a URL HTTPS canônica do GitHub Pages para esta versão.');
-    // Node mantém a validação TLS padrão. Não seguir redirects nem aceitar HTML como firmware.
-    const response = await fetchImpl(url, { redirect: 'error', cache: 'no-store', signal: AbortSignal.timeout(30000) });
+    // Node mantém TLS padrão. Solicitar bytes sem compressão, como exige o downloader ESP32.
+    const response = await fetchImpl(url, { redirect: 'error', cache: 'no-store', headers: { 'Accept-Encoding': 'identity' }, signal: AbortSignal.timeout(30000) });
     try {
         if (response.status !== 200) throw new Error(`Resposta HTTP ${response.status}; esperado 200.`);
         const type = response.headers.get('content-type')?.toLowerCase() || '';
