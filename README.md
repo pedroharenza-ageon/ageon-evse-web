@@ -1,6 +1,6 @@
 # Dashboard EVSE — POC de recursos remotos
 
-Aplicação estática de depuração, com telemetria e comandos MQTT. A etapa 10 acrescenta atualização manual na página de detalhes de cada EVSE; as modificações da etapa 9 organizam a distribuição, os caminhos do Pages e o cache. O firmware ESP32 não foi modificado nessas etapas web. A publicação e a verificação de um binário real no Pages ainda estão pendentes.
+Aplicação estática de depuração, com telemetria e comandos MQTT. A etapa 10 acrescenta atualização manual na página de detalhes de cada EVSE; as modificações da etapa 9 organizam a distribuição, os caminhos do Pages e o cache. O primeiro artefato real para distribuição é `firmware/evse-1.0.0.bin`; consultar seu [registro de lançamento e verificação HTTPS](firmware/evse-1.0.0.md). O código-fonte ESP32 não foi alterado nesta publicação, e o ensaio OTA na placa continua pendente.
 
 Este painel usa o broker público definido para a POC (`broker.hivemq.com`, WebSocket TLS na porta 8884). O transporte não autentica o operador nem substitui as verificações de segurança no ESP32. A aplicação de produção e a evolução de autenticação/assinatura permanecem fora desta entrega.
 
@@ -89,7 +89,7 @@ Playwright é uma dependência apenas de desenvolvimento, fixada em `package-loc
 
 O servidor atende apenas em loopback e sob `/ageon-evse-web/`. Playwright inicia esse servidor com `--distribution-tests`, que habilita fixtures virtuais, seleção de deploy anterior/atual/incompleto e substitui dependências externas por mocks locais. Sem essa opção, o servidor de desenvolvimento serve os arquivos normais e o dashboard conecta ao broker configurado. A suíte OTA bloqueia service workers; a suíte de distribuição instala e atualiza o worker real. Paho/Chart.js são simulados e conexões externas bloqueadas. Binários sintéticos existem somente em memória, não em `firmware/`.
 
-O verificador local também foi executado sobre o artefato existente `evse-1.0.0.bin`: **1.131.648 bytes**, SHA-256 `5916a84aa00c257a6c154cd5465b6f17155a388bf1c272aad819f9c4df5aa176`, resultado `verification: local`. O arquivo permaneceu no diretório de build ESP32. Não houve publicação no Pages, verificação HTTPS de um lançamento remoto, negociação MQTT real, novo build ESP32 ou gravação de hardware.
+Na implementação inicial da etapa 9, o verificador local foi executado sobre um build ainda não publicado de `evse-1.0.0.bin`, com SHA-256 `5916a84aa00c257a6c154cd5465b6f17155a388bf1c272aad819f9c4df5aa176`. Para a publicação solicitada em 10/09/2026, o firmware foi recompilado a partir de `46ddee26431297789feb98b55f91f014a9bfbf73`: **1.131.648 bytes**, SHA-256 `f60a67a64c2c6433c960f536f5ffbefe542472f0e30569ae962c27d1d82b189a`. Este segundo hash identifica o arquivo de distribuição. Build, partições e integridade local foram verificados; resultados remotos e limitações estão no [registro da versão 1.0.0](firmware/evse-1.0.0.md). Não houve gravação de hardware ou comando OTA.
 
 ## Caminhos e cache — etapa 9
 
@@ -120,7 +120,7 @@ npm run firmware:verify -- --file './firmware/evse-1.1.0.bin' --version 1.1.0
 npm run firmware:verify -- --file './firmware/evse-1.1.0.bin' --version 1.1.0 --url 'https://pedroharenza-ageon.github.io/ageon-evse-web/firmware/evse-1.1.0.bin'
 ```
 
-Esses comandos são somente leitura: não copiam, publicam ou instalam firmware. O modo remoto mantém validação TLS e compara tamanho/SHA-256 sem passar pelo service worker. O [roteiro em `firmware/README.md`](firmware/README.md) define nomes imutáveis, registro de lançamento e validação após deploy. Nenhum `.bin` de exemplo foi adicionado; escolher e publicar um lançamento específico continua pendente de solicitação. O perfil físico e o ensaio integrado da etapa 11 também continuam pendentes.
+Esses comandos são somente leitura: não copiam, publicam ou instalam firmware. O modo remoto mantém validação TLS e compara tamanho/SHA-256 sem passar pelo service worker. O [roteiro em `firmware/README.md`](firmware/README.md) define nomes imutáveis, registro de lançamento e validação após deploy. O primeiro artefato incluído é `evse-1.0.0.bin`; `1.1.0` continua sendo apenas um exemplo. O perfil físico e o ensaio integrado da etapa 11 permanecem pendentes.
 
 ## Organização desta entrega
 

@@ -1,6 +1,8 @@
 # Distribuição de firmware da POC
 
-Este diretório recebe **somente binários de aplicação EVSE versionados e aprovados para o ensaio**, por upload manual. Nenhum binário foi incluído na implementação da etapa 9. `evse-1.0.0.bin` e `evse-1.1.0.bin` são exemplos de nomes, não lançamentos disponíveis.
+Este diretório recebe **somente binários de aplicação EVSE versionados, publicados por solicitação do responsável pela POC**. A inclusão do arquivo não comprova aprovação para instalação na placa; conferir o perfil e as pendências no registro de cada lançamento.
+
+O primeiro artefato é [`evse-1.0.0.bin`](evse-1.0.0.bin), destinado à verificação de distribuição HTTPS. Seu [registro de lançamento](evse-1.0.0.md) identifica origem, hash e validações. O perfil NTC desse build permanece não confirmado e bloqueia validação de boot, carga e admissão OTA. `evse-1.1.0.bin`, usado nos exemplos abaixo, ainda não foi publicado.
 
 ## Preparar um lançamento
 
