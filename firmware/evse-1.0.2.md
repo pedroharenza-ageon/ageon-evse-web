@@ -1,5 +1,7 @@
 # EVSE 1.0.2 — firmware de desenvolvimento para ensaio OTA
 
+**Problema identificado no ensaio:** esta versão contém o downloader antigo que verifica o status HTTP antes de o ESP-IDF preenchê-lo, produzindo `http_error` em respostas válidas. O arquivo publicado permanece íntegro e imutável, mas não deve ser alvo de novos testes. A base corrigida é 1.0.3 via USB e o [alvo OTA corrigido é 1.0.4](evse-1.0.4.md). As evidências abaixo registram a publicação original, não sucesso OTA na placa.
+
 Publicação solicitada por Pedro Harenza em 10/09/2026, diretamente na branch `main` do projeto web. Alvo do ensaio: atualizar por OTA a controladora cuja versão-base `1.0.1`, perfil `development` e `boot_validation=passed` foram confirmados pelo usuário no dashboard.
 
 | Campo | Valor |
