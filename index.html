@@ -11,28 +11,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="ota.css">
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js', { scope: './' })
-                .then(reg => {
-                console.log('SW registrado!', reg);
-                // Força a atualização se houver um novo SW
-                reg.update();
-                })
-                .catch(err => console.log('Erro no SW:', err));
-            });
-        }
-    </script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/ota.css">
+    <script defer src="js/sw-register.js"></script>
 </head>
 
 <body>
     <div class="app-shell">
         <main class="main-content" data-scrollable>
             <div id="page-container"></div>
-            <p style="font-size: 12px;">Versão 1.6.6</p>
+            <p style="font-size: 12px;">Versão 1.6.7</p>
         </main>
 
         <nav class="bottom-nav">
@@ -591,9 +579,8 @@
     </template>
 
     <!-- JS externo -->
-    <script type="module" src="main.js"></script>
-    <script defer src="script.js"></script>
-    </script>
+    <script type="module" src="js/main.js"></script>
+    <script defer src="js/script.js"></script>
 
     <div id="install-popup">
         <!-- NOVO: Botão de fechar com ícone 'X' -->
@@ -607,7 +594,7 @@
         <button id="close-btn">Agora não</button>
     </div>
 
-    <script src="install-pwa.js"></script>
+    <script src="js/install-pwa.js"></script>
 </body>
 </html>
 

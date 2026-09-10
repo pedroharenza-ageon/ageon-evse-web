@@ -13,8 +13,9 @@ export default defineConfig({
         screenshot: 'only-on-failure'
     },
     projects: [
-        { name: 'desktop', use: { viewport: { width: 1280, height: 900 } } },
-        { name: 'mobile', use: { viewport: { width: 360, height: 800 } } }
+        { name: 'desktop', testMatch: 'ota.spec.js', use: { viewport: { width: 1280, height: 900 } } },
+        { name: 'mobile', testMatch: 'ota.spec.js', use: { viewport: { width: 360, height: 800 } } },
+        { name: 'distribution', testMatch: 'distribution.spec.js', use: { serviceWorkers: 'allow', viewport: { width: 1280, height: 900 } } }
     ],
-    webServer: { command: 'node tests/browser/server.js', url: 'http://127.0.0.1:4173/ageon-evse-web/', reuseExistingServer: false }
+    webServer: { command: 'node tests/browser/server.js --distribution-tests', url: 'http://127.0.0.1:4173/ageon-evse-web/', reuseExistingServer: false }
 });

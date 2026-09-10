@@ -5,7 +5,8 @@
   "scripts": {
     "test": "node --test tests/*.test.js",
     "check": "node tests/check-syntax.js && npm test",
-    "test:browser": "playwright test"
+    "test:browser": "playwright test",
+    "firmware:verify": "node tools/verify-firmware.mjs"
   },
   "engines": {
     "node": ">=22"

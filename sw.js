@@ -1,72 +1,80 @@
-// Nome e versão do cache. MUDE A VERSÃO a cada nova atualização.
-const cacheName = 'dashboard-v1.6.6';
-
-// Arquivos que o app vai salvar para abrir rápido
-const staticAssets = [
-  './',
-  './index.html',
-  './manifest.json',
-  './install-pwa.js'
-  // Adicione aqui outros arquivos estáticos importantes (CSS, logos, etc.)
+// Incrementar VERSION quando qualquer recurso local do painel mudar.
+const VERSION = '1.6.7';
+const SCOPE = new URL(self.registration.scope);
+const PREFIX = 'ageon-evse-web:' + SCOPE.pathname + ':shell:';
+const CACHE = PREFIX + VERSION;
+const asset = name => new URL(name, SCOPE).href;
+const FILES = [
+    'index.html', 'offline.html', 'manifest.json', 'icon-192.png', 'icon-512.png',
+    'screenshot-mobile.png', 'screenshot-desktop.png',
+    'css/style.css', 'css/ota.css',
+    'js/config.js', 'js/device-manager.js', 'js/utils.js', 'js/ui-manager.js',
+    'js/main.js', 'js/script.js', 'js/install-pwa.js', 'js/sw-register.js',
+    'js/mqtt-manager.js', 'js/mqtt-message-handler.js', 'js/ota-controller.js',
+    'js/ota-panel.js', 'js/ota-protocol.js'
 ];
+const ASSETS = new Set(FILES.map(asset));
 
-// --- 1. INSTALAÇÃO ---
-// Instala o Service Worker, armazena os assets e se ativa imediatamente.
-self.addEventListener('install', async e => {
-  console.log('SW v2: Instalando...');
-  const cache = await caches.open(cacheName);
-  await cache.addAll(staticAssets);
-  return self.skipWaiting(); // Ativa o novo SW sem esperar.
+self.addEventListener('install', event => {
+    event.waitUntil((async () => {
+        const cache = await caches.open(CACHE);
+        // addAll só conclui se o conjunto completo estiver disponível.
+        await cache.addAll(FILES.map(file => new Request(asset(file), { cache: 'reload' })));
+        await self.skipWaiting();
+    })());
 });
 
-// --- 2. ATIVAÇÃO ---
-// Assume o controle da página imediatamente e limpa caches antigos.
-self.addEventListener('activate', e => {
-  console.log('SW v2: Ativado e assumindo controle!');
-  
-  // Limpa todos os caches que não sejam o cache atual (cacheName).
-  e.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(keys
-        .filter(key => key !== cacheName)
-        .map(key => caches.delete(key))
-      );
-    })
-  );
-  
-  // Assume o controle das páginas abertas imediatamente.
-  return self.clients.claim(); 
+self.addEventListener('activate', event => {
+    event.waitUntil((async () => {
+        for (const key of await caches.keys()) {
+            if (key.startsWith(PREFIX) && key !== CACHE) {
+                await caches.delete(key);
+            } else if (/^dashboard-v[0-9]+(?:\.[0-9]+)*$/.test(key)) {
+                // Nomes antigos eram compartilhados na origem: remover só entradas deste projeto.
+                const legacy = await caches.open(key);
+                for (const request of await legacy.keys()) {
+                    if (request.url.startsWith(SCOPE.href)) await legacy.delete(request);
+                }
+                if ((await legacy.keys()).length === 0) await caches.delete(key);
+            }
+        }
+        await self.clients.claim();
+    })());
 });
 
-// --- 3. FETCH ---
-// Intercepta as requisições. Serve do cache primeiro para máxima velocidade.
-self.addEventListener('fetch', e => {
-  // Ignora requisições que não são GET (ex: POST, etc.)
-  if (e.request.method !== 'GET') {
-    return;
-  }
+function unavailable() {
+    return new Response('Recurso indisponível sem conexão.', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+}
 
-  e.respondWith(
-    (async () => {
-      // 1. Tenta pegar do cache primeiro (Estratégia "Cache First")
-      const cachedResponse = await caches.match(e.request);
-      if (cachedResponse) {
-        // Se encontrou no cache, retorna imediatamente.
-        return cachedResponse;
-      }
-
-      // 2. Se não encontrou no cache, busca na rede.
-      try {
-        const networkResponse = await fetch(e.request);
-        // Opcional: Você pode adicionar a resposta da rede ao cache aqui se quiser
-        // Ex: const cache = await caches.open(cacheName);
-        //     cache.put(e.request, networkResponse.clone());
-        return networkResponse;
-      } catch (error) {
-        // Se a rede falhar, você pode retornar uma página de fallback offline
-        console.log('Fetch falhou; o usuário está offline e o recurso não está no cache.', error);
-        // return caches.match('/offline.html'); // (se você tiver uma)
-      }
-    })()
-  );
+self.addEventListener('fetch', event => {
+    const request = event.request, url = new URL(request.url);
+    if (request.method !== 'GET' || !url.href.startsWith(SCOPE.href)) return;
+    // Binários nunca consultam CacheStorage, cache HTTP ou fallback HTML.
+    if (url.pathname.startsWith(SCOPE.pathname + 'firmware/')) {
+        event.respondWith(fetch(new Request(request, { cache: 'no-store', redirect: 'error' })).catch(unavailable));
+        return;
+    }
+    const navigation = request.mode === 'navigate' &&
+        (url.pathname === SCOPE.pathname || url.pathname === SCOPE.pathname + 'index.html');
+    if (navigation) {
+        event.respondWith((async () => {
+            const cache = await caches.open(CACHE);
+            try {
+                // Confirmar acesso à rede; usar o HTML do mesmo conjunto de JS/CSS instalado.
+                const response = await fetch(new Request(request, { cache: 'no-store', signal: AbortSignal.timeout(15000) }));
+                if (!response.ok) return response;
+                return await cache.match(asset('index.html')) || response;
+            } catch {
+                return await cache.match(asset('offline.html')) || unavailable();
+            }
+        })());
+        return;
+    }
+    if (ASSETS.has(url.href)) {
+        event.respondWith((async () => {
+            const cache = await caches.open(CACHE);
+            return await cache.match(request) || fetch(request).catch(unavailable);
+        })());
+    }
+    // Arquivos inexistentes, outras páginas/projetos e CDNs mantêm a resposta da rede.
 });

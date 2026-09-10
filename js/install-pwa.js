@@ -2,7 +2,7 @@ let deferredPrompt = null;
 
 function isRunningStandalone() {
   // Camada 1: Verifica se a URL contém um parâmetro que você define no seu manifest.json
-  // DICA: No seu manifest.json, mude o "start_url" para "/?mode=pwa" ou similar.
+  // O manifest usa "./?mode=pwa" para preservar o prefixo do projeto Pages.
   const urlParams = new URLSearchParams(window.location.search);
   const isPwaParam = urlParams.get('mode') === 'pwa' || urlParams.get('utm_source') === 'pwa';
 

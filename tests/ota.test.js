@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
-import { OtaController } from '../ota-controller.js';
-import { OTA, buildCommand, higherVersion, validVersion, validUrl, parseStatus, advanceStatus } from '../ota-protocol.js';
-import { handleMqttMessage } from '../mqtt-message-handler.js';
-import { publishMessage, setupMQTT, setupVisibilityAPI } from '../mqtt-manager.js';
+import { OtaController } from '../js/ota-controller.js';
+import { OTA, buildCommand, higherVersion, validVersion, validUrl, parseStatus, advanceStatus } from '../js/ota-protocol.js';
+import { handleMqttMessage } from '../js/mqtt-message-handler.js';
+import { publishMessage, setupMQTT, setupVisibilityAPI } from '../js/mqtt-manager.js';
 
 const A = 'AABBCCDDEE01', B = 'AABBCCDDEE02';
 const URL = version => `https://${OTA.host}${OTA.path}evse-${version}.bin`;

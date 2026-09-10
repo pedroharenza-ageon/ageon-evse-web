@@ -1,0 +1,1 @@
+firmware/*.bin -text -diff -merge -filter
