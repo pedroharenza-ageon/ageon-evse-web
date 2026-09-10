@@ -4,6 +4,8 @@ Este diretório recebe **somente binários de aplicação EVSE versionados, publ
 
 O primeiro artefato é [`evse-1.0.0.bin`](evse-1.0.0.bin), destinado à verificação de distribuição HTTPS. Seu [registro de lançamento](evse-1.0.0.md) identifica origem, hash e validações. O perfil NTC desse build permanece não confirmado e bloqueia validação de boot, carga e admissão OTA. `evse-1.1.0.bin`, usado nos exemplos abaixo, ainda não foi publicado.
 
+O alvo de desenvolvimento para atualizar a base 1.0.1 é [`evse-1.0.2.bin`](evse-1.0.2.bin). Seu [registro de lançamento](evse-1.0.2.md) informa configuração, alterações locais incluídas, hash, validações e procedimento do ensaio. Essa imagem dispensa os checks físicos de OTA/boot para desenvolvimento com ou sem potência; não representa aceite do conjunto de produção.
+
 ## Preparar um lançamento
 
 Normal e desenvolvimento usam o mesmo descritor `EVSE` e as mesmas verificações locais/remotas abaixo, sem argumento de perfil. Registrar a configuração de checks em cada lançamento; a imagem instalada define os requisitos do próximo boot. É possível trocar de configuração por OTA com versão superior, sem exigir USB após o provisionamento inicial. Como ambos usam `evse-X.Y.Z.bin`, reservar versões distintas para quaisquer artefatos publicados com bytes diferentes. A configuração de desenvolvimento preserva a lógica normal de carga; o bloqueio do relé durante OTA é temporário.
