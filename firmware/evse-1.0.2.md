@@ -38,7 +38,22 @@ A bancada informada é a controladora USB, sem potência, com CP real próximo d
 
 URL final: [download de evse-1.0.2.bin](https://pedroharenza-ageon.github.io/ageon-evse-web/firmware/evse-1.0.2.bin).
 
-Verificação remota pendente do deploy deste commit. Executar após a publicação:
+**Aprovada em 10/09/2026 às 20:32:12.431 UTC.** Publicação na `main` pelo commit `6309b90017c85717bdb70e8bad02e70e6966dd4c`; o [deploy do Pages](https://github.com/pedroharenza-ageon/ageon-evse-web/actions/runs/34526787774) terminou com sucesso. GET HTTPS retornou HTTP 200, sem redirecionamento ou compressão, com TLS validado, 1.132.208 bytes e SHA-256 idêntico ao arquivo local.
+
+```json
+{
+  "file": "evse-1.0.2.bin",
+  "version": "1.0.2",
+  "project": "EVSE",
+  "size_bytes": 1132208,
+  "sha256": "9d457e0359a14dc18376b14513b1bf6268cc21daf940acd950d8f64c6869c7ed",
+  "url": "https://pedroharenza-ageon.github.io/ageon-evse-web/firmware/evse-1.0.2.bin",
+  "verification": "published",
+  "verified_at": "2026-09-10T20:32:12.431Z"
+}
+```
+
+A versão anterior 1.0.0 também foi verificada por HTTPS às 20:32:12.844 UTC: HTTP 200, 1.131.648 bytes e hash original `f60a67a64c2c6433c960f536f5ffbefe542472f0e30569ae962c27d1d82b189a` preservados. Para repetir a verificação de 1.0.2:
 
 ```powershell
 node tools/verify-firmware.mjs --file firmware/evse-1.0.2.bin --version 1.0.2 --url https://pedroharenza-ageon.github.io/ageon-evse-web/firmware/evse-1.0.2.bin
