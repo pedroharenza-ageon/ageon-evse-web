@@ -36,7 +36,13 @@ O perfil de desenvolvimento dispensa checks físicos de CP/State A/GFCI/NTCs/per
 
 URL: [download de evse-1.0.6.bin](https://pedroharenza-ageon.github.io/ageon-evse-web/firmware/evse-1.0.6.bin).
 
-Verificação remota pendente do deploy; a validação local ainda não comprova publicação.
+**Aprovada em 11/09/2026 às 11:47:30.795 UTC.** Publicação na `main` em `674873069fa90cd5d643875358b0c6a8199b6f5c`; [deploy do Pages concluído com sucesso](https://github.com/pedroharenza-ageon/ageon-evse-web/actions/runs/34595644640). GET HTTPS retornou HTTP 200, sem redirects/compressão, com TLS validado, tamanho de 1.132.272 bytes e SHA-256 `c35eba0a63b9eea75361529deb8015d8d2df213083c85cefdb07b5b3b61b409e` idênticos ao arquivo local; resultado `verification=published`.
+
+Às 11:47:33.531 UTC, 1.0.4 também manteve seus 1.132.272 bytes e hash original `265866f9343a3ede7943750512c762aab5cc23a95d7ce0432c6476ed67f12d99`. Isso confirma preservação do histórico, não corrige seu downloader.
+
+```powershell
+node tools/verify-firmware.mjs --file firmware/evse-1.0.6.bin --version 1.0.6 --url https://pedroharenza-ageon.github.io/ageon-evse-web/firmware/evse-1.0.6.bin
+```
 
 ## Ensaio 1.0.5 → 1.0.6
 
