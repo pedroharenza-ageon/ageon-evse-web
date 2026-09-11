@@ -31,7 +31,9 @@ Nome ausente no histórico e URL retornando HTTP 404 antes da publicação. Todo
 
 URL: [evse-1.0.8.bin](https://pedroharenza-ageon.github.io/ageon-evse-web/firmware/evse-1.0.8.bin).
 
-Verificação remota pendente do deploy.
+**Aprovada em 11/09/2026 às 12:22:40.897 UTC.** Publicação `d87d92dfe99bb89ffac8460d1d1fa598e7792fd1`; [deploy do Pages concluído](https://github.com/pedroharenza-ageon/ageon-evse-web/actions/runs/34598540906). GET HTTPS com TLS validado retornou HTTP 200, sem redirects/compressão, 1.168.256 bytes e SHA-256 `5d4aa1158802eae33fde7e25a068a813f3bdd456853ae813c529f36e88e1d0e8` idênticos ao arquivo local (`verification=published`).
+
+Às 12:22:41.728 UTC, a versão 1.0.6 manteve seus bytes e hash original `c35eba0a63b9eea75361529deb8015d8d2df213083c85cefdb07b5b3b61b409e`.
 
 ## Ensaio 1.0.7 → 1.0.8
 
