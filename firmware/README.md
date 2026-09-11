@@ -1,5 +1,7 @@
 # Distribuição de firmware da POC
 
+**Alvo atual de diagnóstico: [1.0.8](evse-1.0.8.md)**, para a base USB 1.0.7 confirmada com perfil `development` e boot `passed`. Preserva a instrumentação TLS/heap/recusa; não é uma nova correção comprovada. O ensaio 1.0.5 → 1.0.6 falhou na placa. As orientações abaixo sobre alvos antigos são históricas; usar 1.0.8 no próximo ensaio e capturar os logs seriais.
+
 Este diretório recebe **somente binários de aplicação EVSE versionados, publicados por solicitação do responsável pela POC**. A inclusão do arquivo não comprova aprovação para instalação na placa; conferir o perfil e as pendências no registro de cada lançamento.
 
 O primeiro artefato é [`evse-1.0.0.bin`](evse-1.0.0.bin), destinado à verificação de distribuição HTTPS. Seu [registro de lançamento](evse-1.0.0.md) identifica origem, hash e validações. O perfil NTC desse build permanece não confirmado e bloqueia validação de boot, carga e admissão OTA. `evse-1.1.0.bin`, usado nos exemplos abaixo, ainda não foi publicado.

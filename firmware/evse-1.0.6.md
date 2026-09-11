@@ -1,5 +1,7 @@
 # EVSE 1.0.6 — alvo OTA de desenvolvimento com correção TLS
 
+**Resultado posterior:** o ensaio com a base 1.0.5 correta ainda falhou com `-0x7100`. A correção de capacidade não resolveu completamente a transferência. Para diagnóstico, usar base 1.0.7 e [alvo 1.0.8](evse-1.0.8.md). Registro e binário abaixo permanecem históricos e imutáveis.
+
 Preparado a pedido de Pedro Harenza em 11/09/2026 para publicação diretamente na `main` web. O usuário confirmou a base USB 1.0.5 com `ota_profile=development` e `boot_validation=passed`.
 
 | Campo | Valor |
