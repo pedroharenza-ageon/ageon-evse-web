@@ -1,5 +1,7 @@
 # EVSE 1.0.4 — alvo OTA de desenvolvimento com correção HTTP
 
+**Atualização de 11/09/2026:** este artefato contém o limite TLS de entrada de 8 KiB que causou `-0x7100`/`download_interrupted`. Mantido como histórico imutável; não usar como alvo. Para o próximo ensaio, usar a base USB 1.0.5 confirmada e o [alvo 1.0.6 corrigido](evse-1.0.6.md). O registro abaixo descreve a preparação histórica.
+
 Preparado a pedido de Pedro Harenza em 10/09/2026, para publicação diretamente na `main` web e ensaio OTA a partir da base 1.0.3. O usuário confirmou essa base no dashboard com `ota_profile=development` e `boot_validation=passed` após a gravação USB.
 
 | Campo | Valor |
